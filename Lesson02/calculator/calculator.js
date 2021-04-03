@@ -21,8 +21,8 @@ function calculate() {
                                               : "Division by zero not allowed!";
                                     }
                    }
-  calculator['x'] = parseInt(readline.question('Enter a number: '));
-  calculator['y'] = parseInt(readline.question('Enter a number: '));
+  calculator['x'] = parseFloat(readline.question('Enter a number: '));
+  calculator['y'] = parseFloat(readline.question('Enter a number: '));
   let operation = readline.question('Choose an operation (+, -, *, /): ');
   if (assertOperation(operation)) {
     let response = calculator[operation]();

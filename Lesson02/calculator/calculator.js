@@ -1,6 +1,8 @@
 console.log("Welcome to the calculator!");
 const readline = require('readline-sync');
 let quit = 'N';
+
+//Open a loop that runs calculate() until user quits
 do {
   calculate();
   quit = readline.question("Would you like to calculate again? (Y/N): ");

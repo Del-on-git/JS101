@@ -8,23 +8,28 @@ do {
 console.log("Thanks for calculating; goodbye!");
 
 function calculate() {
-  let values = { x:0, y:0 };
-  let calculator = (f, obj) => {
-    switch(f) {
-      case '+':
-        return obj['x'] + obj['y'];
-      case '-':
-        return obj['x'] - obj['y'];
-      case '*':
-        return obj['x'] * obj['y'];
-      case '/':
-        return (obj['y'] != 0) ? obj['x'] / obj['y'] : "Division by zero not allowed!";
-      default:
-        return "Calculator does not understand this operation."
-    }
+  let calculator = {
+                    x: 0,
+                    y: 0,
+                    '+': function() { return this.x + this.y; },
+                    '-': function() { return this.x - this.y; },
+                    '*': function() { return this.x * this.y; },
+                    '/': function() { return (this.y != 0) ?
+                                              this.x / this.y
+                                              : "Division by zero not allowed!";
+                                    }
+                   }
+  calculator['x'] = parseInt(readline.question('Enter a number: '));
+  calculator['y'] = parseInt(readline.question('Enter a number: '));
+  let operation = readline.question('Choose an operation (+, -, *, /): ');
+  if (assertOperation(operation)) {
+    let response = calculator[operation]();
+    console.log(`Your result is ${response}\n`);
+  } else {
+    console.log('I do not understand this operation.');
   }
-  values['x'] = parseInt(readline.question('Enter a number: '));
-  values['y'] = parseInt(readline.question('Enter a number: '));
-  let response = calculator(readline.question('Choose an operation (+, -, * /): '), values);
-  console.log(`Your result is ${response}\n`);
+}
+
+function assertOperation(str) {
+  return str === '+' || str === '-' || str === '*' || str === '/';
 }

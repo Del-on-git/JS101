@@ -1,4 +1,5 @@
 {
+  "EN": {
   "WELCOME": "Welcome to the calculator!",
   "GOODBYE": "Thanks for calculating; goodbye!",
   "REQUEST_NUMBER": "Enter a number: ",
@@ -8,4 +9,5 @@
   "UNKNOWN_OPERATION_ERR": "ERROR: Unknown operation!",
   "DIV_BY_ZERO_ERR": "ERROR: Division by zero is not allowed!",
   "NAN_ERR": "ERROR: Value provided is not a number!"
+  }
 }

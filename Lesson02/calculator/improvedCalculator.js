@@ -1,14 +1,4 @@
-const MESSAGES = {
-  WELCOME: 'Welcome to the calculator!',
-  GOODBYE: 'Thanks for calculating; goodbye!',
-  REQUEST_NUMBER: 'Enter a number: ',
-  USER_PROMPT: '>> ',
-  REQUEST_OPERATION: 'Choose an operation (+, -, *, /): ',
-  AGAIN_PROMPT: 'Would you like to calculate again? (Y/N): ',
-  UNKNOWN_OPERATION_ERR: 'ERROR: Unknown operation!',
-  DIV_BY_ZERO_ERR: 'ERROR: Division by zero is not allowed!',
-  NAN_ERR: 'ERROR: Value provided is not a number!'
-};
+let MESSAGES = require('./calculator_messages.json');
 
 let readline = require('readline-sync');
 

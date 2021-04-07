@@ -1,5 +1,5 @@
-let MESSAGES = require('./calculator_messages.json');
-
+let INTERNATIONAL_MESSAGES = require('./calculator_messages.json');
+let MESSAGES = INTERNATIONAL_MESSAGES.EN;
 let readline = require('readline-sync');
 
 let values = {

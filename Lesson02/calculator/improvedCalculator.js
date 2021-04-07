@@ -1,6 +1,24 @@
 let INTERNATIONAL_MESSAGES = require('./calculator_messages.json');
-let MESSAGES = INTERNATIONAL_MESSAGES.EN;
+
 let readline = require('readline-sync');
+
+let lang;
+
+let MESSAGES;
+
+let isValidLang = (str) => {
+  if (str.trimStart() === '') {
+    return false;
+  }
+  let choice = parseInt(str, 10);
+  if (Number.isNaN(choice)) {
+    return false;
+  } else if (choice < 1 || choice > INTERNATIONAL_MESSAGES.LANG_CHOICE) {
+    return false;
+  } else {
+    return true;
+  }
+};
 
 let values = {
   num1: null,
@@ -56,11 +74,31 @@ let getOp = () => {
 };
 
 let repeat = () => {
-  console.log(MESSAGES.AGAIN_PROMPT);
-  return (readline.question(MESSAGES.USER_PROMPT).toUpperCase() !== 'N');
+  let choice;
+  do {
+    console.log(MESSAGES.AGAIN_PROMPT);
+    choice = readline.question(MESSAGES.USER_PROMPT);
+    switch (choice) {
+      case '1':
+        return true;
+      case '2':
+        return false;
+      default:
+        console.log(MESSAGES.INVALID_CHOICE);
+    }
+  } while (choice);
+
+  return false;
 };
 
 //=============================================================== PROGRAM START
+do {
+  console.log(INTERNATIONAL_MESSAGES.GREETING);
+  lang = readline.question(">> ");
+} while (!isValidLang(lang));
+
+MESSAGES = INTERNATIONAL_MESSAGES[lang];
+
 console.log(MESSAGES.WELCOME);
 do {
   do {
@@ -78,7 +116,7 @@ do {
   values.result = operation(values.operation)(values.num1, values.num2);
 
   console.log(`\n${values.num1} ${values.operation} ${values.num2} = ${values.result}\n`);
-} while (repeat());
 
+} while (repeat());
 console.log(MESSAGES.GOODBYE);
 //================================================================= PROGRAM END

@@ -1,13 +1,40 @@
 {
-  "EN": {
-  "WELCOME": "Welcome to the calculator!",
-  "GOODBYE": "Thanks for calculating; goodbye!",
-  "REQUEST_NUMBER": "Enter a number: ",
-  "USER_PROMPT": ">> ",
-  "REQUEST_OPERATION": "Choose an operation (+, -, *, /): ",
-  "AGAIN_PROMPT": "Would you like to calculate again? (Y/N): ",
-  "UNKNOWN_OPERATION_ERR": "ERROR: Unknown operation!",
-  "DIV_BY_ZERO_ERR": "ERROR: Division by zero is not allowed!",
-  "NAN_ERR": "ERROR: Value provided is not a number!"
-  }
+  "LANG_CHOICE": 3,
+  "GREETING": "You are about to initiate the calculator, please select a language from the menu\n\t1) 中国人\n\t2) English\n\t3) Español\n",
+  "1": {
+    "WELCOME": "欢迎使用计算器！",
+    "GOODBYE": "感谢您的计算；再见!",
+    "REQUEST_NUMBER": "输入数字：",
+    "USER_PROMPT": ">> ",
+    "REQUEST_OPERATION": "选择一个操作（+，-，*，/）：",
+    "AGAIN_PROMPT": "您要再次计算吗？1）是，2）否：",
+    "UNKNOWN_OPERATION_ERR": "错误：未知操作！!",
+    "DIV_BY_ZERO_ERR": "错误：不允许除以零！",
+    "NAN_ERR": "错误：提供的值不是数字！",
+    "INVALID_CHOICE": "错误：无效的选择！"
+  },  
+  "2": {
+    "WELCOME": "Welcome to the calculator!",
+    "GOODBYE": "Thanks for calculating; goodbye!",
+    "REQUEST_NUMBER": "Enter a number: ",
+    "USER_PROMPT": ">> ",
+    "REQUEST_OPERATION": "Choose an operation (+, -, *, /): ",
+    "AGAIN_PROMPT": "Would you like to calculate again? 1) Yes, 2) No: ",
+    "UNKNOWN_OPERATION_ERR": "ERROR: Unknown operation!",
+    "DIV_BY_ZERO_ERR": "ERROR: Division by zero is not allowed!",
+    "NAN_ERR": "ERROR: Value provided is not a number!",
+    "INVALID_CHOICE": "ERROR: Invalid choice!"
+  },
+  "3": {
+     "WELCOME": "¡Bienvenido a la calculadora!",
+     "GOODBYE": "Gracias por calcular; ¡adiós!",
+     "REQUEST_NUMBER": "Ingresa un número:",
+     "USER_PROMPT": ">> ",
+     "REQUEST_OPERATION": "Elija una operación (+, -, *, /):",
+     "AGAIN_PROMPT": "¿Desea volver a calcular? 1) Sí, 2) No:",
+     "UNKNOWN_OPERATION_ERR": "ERROR: ¡Operación desconocida!",
+     "DIV_BY_ZERO_ERR": "ERROR: ¡No se permite la división por cero!",
+     "NAN_ERR": "ERROR: ¡El valor proporcionado no es un número!",
+     "INVALID_CHOICE": "ERROR: ¡Elección no válida!"
+   } 
 }

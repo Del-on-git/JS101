@@ -88,9 +88,7 @@ let repeat = () => {
       default:
         console.log(MESSAGES.INVALID_CHOICE);
     }
-  } while (choice);
-
-  return false;
+  } while (true);
 };
 
 //=============================================================== PROGRAM START

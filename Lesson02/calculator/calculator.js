@@ -110,17 +110,14 @@ MESSAGES = INTERNATIONAL_MESSAGES[lang];
 
 //Begin calculator using selected language, calculate until user quits
 console.log(MESSAGES.WELCOME);
+
 do {
   values.num1 = getAndValidateNum();
-
   values.num2 = getAndValidateNum();
-
   values.op = getAndValidateOp();
-
   values.result = operation(values.op)(values.num1, values.num2);
-
   console.log(`\n${values.num1} ${values.op} ${values.num2} = ${values.result}\n`);
-
 } while (repeat());
+
 console.log(MESSAGES.GOODBYE);
 //================================================================= PROGRAM END

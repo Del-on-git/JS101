@@ -23,7 +23,7 @@ let isValidLang = (str) => {
 let values = {
   num1: null,
   num2: null,
-  operation: '',
+  op: '',
   result: null
 };
 
@@ -53,6 +53,16 @@ let isNumber = (num) => {
   }
 };
 
+let getAndValidateNum = () => {
+  let input;
+  do {
+    console.log(MESSAGES.REQUEST_NUMBER);
+    input = readline.question(MESSAGES.USER_PROMPT);
+    input =  (input.trimStart() === '') ? NaN : parseFloat(input);
+  } while (!isNumber(input));
+  return input;
+};
+
 let isOp = (str) => {
   if (str === '+' || str === '-' || str === '*' || str === '/') {
     return true;
@@ -62,15 +72,13 @@ let isOp = (str) => {
   }
 };
 
-let getNum = () => {
-  console.log(MESSAGES.REQUEST_NUMBER);
-  let input = readline.question(MESSAGES.USER_PROMPT);
-  return (input.trimStart() === '') ? NaN : parseFloat(input);
-};
-
-let getOp = () => {
-  console.log(MESSAGES.REQUEST_OPERATION);
-  return readline.question(MESSAGES.USER_PROMPT);
+let getAndValidateOp = () => {
+  let input;
+  do {
+    console.log(MESSAGES.REQUEST_OPERATION);
+    input = readline.question(MESSAGES.USER_PROMPT);
+  } while (!isOp(input));
+  return input;
 };
 
 let repeat = () => {
@@ -78,11 +86,11 @@ let repeat = () => {
   do {
     console.log(MESSAGES.AGAIN_PROMPT);
     choice = readline.question(MESSAGES.USER_PROMPT);
-    switch (choice) {
-      case '1':
+    switch (choice.toUpperCase()) {
+      case 'Y':
         console.clear();
         return true;
-      case '2':
+      case 'N':
         console.clear();
         return false;
       default:
@@ -103,24 +111,15 @@ MESSAGES = INTERNATIONAL_MESSAGES[lang];
 //Begin calculator using selected language, calculate until user quits
 console.log(MESSAGES.WELCOME);
 do {
-  //Get values 1 and 2; assert that they are numbers before proceeding
-  do {
-    values.num1 = getNum();
-  } while (!isNumber(values.num1));
+  values.num1 = getAndValidateNum();
 
-  do {
-    values.num2 = getNum();
-  } while (!isNumber(values.num2));
+  values.num2 = getAndValidateNum();
 
-  //Get operation to perform; assert it is a valid operation before proceeding
-  do {
-    values.operation = getOp();
-  } while (!isOp(values.operation));
+  values.op = getAndValidateOp();
 
-  //Calculate and display value
-  values.result = operation(values.operation)(values.num1, values.num2);
+  values.result = operation(values.op)(values.num1, values.num2);
 
-  console.log(`\n${values.num1} ${values.operation} ${values.num2} = ${values.result}\n`);
+  console.log(`\n${values.num1} ${values.op} ${values.num2} = ${values.result}\n`);
 
 } while (repeat());
 console.log(MESSAGES.GOODBYE);

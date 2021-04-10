@@ -1,0 +1,8 @@
+{
+  "COMPOUNDING_PERIODS": [ 1, 2, 4, 6, 26, 52, 365 ],
+  "MESSAGES": {
+    "GREET": "Welcome to the Loanly Calculator!\nI'll help you navigate your future loan. Please be sure to read the prompts carefully before responding, and try to have fun!\nYou can press 'Q' at any time to quit. Ready? (Press 'Y' to continue).",
+    "START": "Great! Let's get started by asking a few simple questions.\nFirst, how much would you like to borrow?",
+    "REQUEST_LOAN_AMOUNT": "Loan amount: "
+  }
+}

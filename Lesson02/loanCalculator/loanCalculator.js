@@ -224,6 +224,7 @@ if (ynq()) {
     if (!QUIT) {
       console.log(MESSAGES.NEW_CALCULATION);
     }
+  // eslint-disable-next-line no-unmodified-loop-condition
   } while (QUIT !== true && ynq() !== false);
 }
 console.log(MESSAGES.GOODBYE);

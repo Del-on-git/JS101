@@ -206,6 +206,49 @@ let getAndValidateCompounding = () => {
   }
 };
 
+let confirmYear = (year) => {
+
+};
+
+let isValidYear = (year) => {
+  if (Number.isNaN(year)) {
+    console.log(ERRORS.NAN);
+    return false;
+  } else if (year < 0) {
+    console.log(ERRORS.NEG_YEAR);
+    return false;
+  } else if ( y % 1 !== 0) {
+    console.log(ERRORS.NON_INT_YEAR);
+    return false;
+  } else {
+    return true;
+  }
+};
+
+let getAndValidateYear = () => {
+  if (QUIT) return undefined;
+  let input;
+  do {
+    input = readline.question(MESSAGES.REQUEST_DURATION_YEARS);
+    input = formatNumber(input);
+  } while (!isValidYear(input));
+
+  return input;
+};
+
+let isValidMonth = (month) => {
+  
+};
+
+let getAndValidateMonths = () => {
+  if (QUIT) return undefined;
+  let input;
+  do {
+    input = readline.question(MESSAGES.REQUEST_DURATION_MONTHS);
+    input = formatNumber(input);
+  } while (!isValidMonth(input));
+};
+
 //=================================================================PROGRAM START
 console.log(MESSAGES.GREET);
 if (ynq()) {
@@ -222,6 +265,11 @@ if (ynq()) {
       loanTerms.compoundingPeriodsPerYear = getAndValidateCompounding();
     }
     if (!QUIT) {
+      console.log(MESSAGES.START_DURATION);
+      loanTerms.durationYears = getAndValidateYear();
+      loanTerms.durationMonths = getAndValidateMonths();
+    }
+    if (!QUIT) {
       console.log(MESSAGES.NEW_CALCULATION);
     }
   // eslint-disable-next-line no-unmodified-loop-condition
@@ -229,11 +277,5 @@ if (ynq()) {
 }
 console.log(MESSAGES.GOODBYE);
 //===================================================================PROGRAM END
-
-//TODO: Write functions to get loan duration
-
-//"Last question: How long will you be repaying this loan?"
-//"Years: "
-//"Months: "
 
 //Display amortization.

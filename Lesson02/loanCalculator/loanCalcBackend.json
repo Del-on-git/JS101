@@ -14,6 +14,10 @@
     "SELECT_COMPOUNDING": "Okay, here are some other compounding options. Select the number that corresponds to your loan:\n\t1) Annually\n\t2) Semi-annually\n\t3) Quarterly\n\t4) Semi-monthly\n\t5) Biweekly\n\t6) Weekly\n\t7) Daily\n\t8) Other\n\nSelect 1-8: ",
     "GET_CUSTOM_COMPOUNDING": "How many compounding periods per year? Positive values less than 1 are ok: ",
     "CONFIRM_COMPOUNDING": "Let's be sure we got this right. Your loan should be compounded ",
+    "START_DURATION": "Last question: How long will you be repaying this loan?  You can  give me the number of years and months you expect to be paying.",
+    "REQUEST_DURATION_YEARS": "Years: ",
+    "REQUEST_DURATION_MONTHS": "Months: ",
+    "CONFIRM_DURATION": "You expect to repay this loan over ",
     "YNQ": "Y/N/Q: "
   },
   "ERRORS": {
@@ -22,6 +26,11 @@
     "NEG_LOAN_AMT": "ERROR: Please enter a positive amount to borrow",
     "NEG_APR": "ERROR: Please enter a positive APR",
     "INVALID_SELECTION": "ERROR: Make a selection from the menu",
-    "INVALID_COMPOUNDING": "ERROR: Compounding periods need to be greater than 0"
+    "INVALID_COMPOUNDING": "ERROR: Compounding periods need to be greater than 0",
+    "NEG_YEAR": "ERROR: Please provide a non-negative number of years",
+    "NON_INT_YEAR": "ERROR: Please provide a whole number year",
+    "NOT_ENOUGH_TIME": "ERROR: Please provide at least 1 month for payment.",
+    "NEG_MONTH": "ERROR: Please provide a non-negative number of months",
+    "NON_INT_MONTH": "ERROR: Please provide a whole number month"
   }
 }

@@ -55,6 +55,7 @@ let ynq = () => {
 
   switch (input) {
     case 'Y':
+      console.clear();
       return true;
     case 'N':
       return false;
@@ -355,7 +356,6 @@ if (ynq()) {
       loanTerms.paymentSize = calcAmortization(loanTerms);
 
       console.log(MESSAGES.REGULAR_PAYMENT + loanTerms.paymentSize + '\n');
-
     }
     if (!QUIT) {
       console.log(MESSAGES.NEW_CALCULATION);

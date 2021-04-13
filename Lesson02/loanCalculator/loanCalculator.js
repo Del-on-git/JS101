@@ -336,7 +336,7 @@ if (ynq()) {
       console.log(MESSAGES.START_APR);
       loanTerms.annualRate = getAndValidateAPR();
     }
-    if (!QUIT) {
+    if (!QUIT && loanTerms.annualRate !== 0) {
       loanTerms.compoundingPeriodsPerYear = getAndValidateCompounding();
     }
     if (!QUIT) {
@@ -356,7 +356,6 @@ if (ynq()) {
 
       console.log(MESSAGES.REGULAR_PAYMENT + loanTerms.paymentSize + '\n');
 
-      console.log(loanTerms);
     }
     if (!QUIT) {
       console.log(MESSAGES.NEW_CALCULATION);

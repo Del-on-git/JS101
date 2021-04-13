@@ -5,31 +5,36 @@ let ERRORS = BACKEND.ERRORS;
 let QUIT = false;
 
 let loanTerms = {
-  amount: 0,
-  annualRate: 0,
-  durationYears: 0,
-  durationMonths: 0,
-  ratePerPayment: 0,
-  totalPayments: 0,
-  compoundingPeriodsPerYear: 0,
-  paymentsPerYear: 0,
-  paymentSize: 0
+  amount: null,
+  annualRate: null,
+  durationYears: null,
+  durationMonths: null,
+  ratePerPayment: null,
+  totalPayments: null,
+  compoundingPeriodsPerYear: null,
+  paymentsPerYear: null,
+  paymentSize: null
 };
 
 let setRate = (apr, numCompounding, payPerYear) => {
   return Math.pow(1 + (apr / numCompounding), numCompounding / payPerYear) - 1;
 };
 
-let setTotalPayments = (durationYears, durationMonths) => {
-  return (12 * durationYears) + durationMonths;
+let setTotalPayments = (loan) => {
+  let duration = loan.durationYears + (loan.durationMonths / 12);
+  return duration * loan.paymentsPerYear;
 };
 
 let calcAmortization = (loan) => {
   let payment = loan.amount;
+  if (loan.annualRate === 0) {
+    payment /= loan.paymentsPerYear;
+    return payment.toFixed(2);
+  }
   payment *= loan.ratePerPayment;
   payment *= Math.pow(1 + loan.ratePerPayment, loan.totalPayments);
   payment /= (Math.pow(1 + loan.ratePerPayment, loan.totalPayments) - 1);
-  return Number(payment.toFixed(2));
+  return payment.toFixed(2);
 };
 
 let isYnq = (input) => {
@@ -113,7 +118,7 @@ let isValidAPR = (num) => {
 };
 
 let confirmAPR = (percent) => {
-  console.log(MESSAGES.CONFIRM_APR + percent + "%");
+  console.log(MESSAGES.CONFIRM_APR[0] + percent + MESSAGES.CONFIRM_APR[1]);
   return ynq();
 };
 
@@ -145,7 +150,9 @@ let isValidCompounding = (num) => {
 };
 
 let confirmCompounding = (compoundings) => {
-  console.log(MESSAGES.CONFIRM_COMPOUNDING + compoundings + " times per year.");
+  console.log(MESSAGES.CONFIRM_COMPOUNDING[0]
+    + compoundings
+    + MESSAGES.CONFIRM_COMPOUNDING[1]);
   return ynq();
 };
 
@@ -207,11 +214,6 @@ let getAndValidateCompounding = () => {
   }
 };
 
-let confirmDurationYear = (years) => {
-  console.log(MESSAGES.CONFIRM_DURATION + years + " years?");
-  return ynq();
-};
-
 let isValidYear = (year) => {
   if (Number.isNaN(year)) {
     console.log(ERRORS.NAN);
@@ -235,16 +237,7 @@ let getAndValidateYear = () => {
     input = formatNumber(input);
   } while (!isValidYear(input));
 
-  if (confirmDurationYear(input)) {
-    return input;
-  } else {
-    return getAndValidateYear();
-  }
-};
-
-let confirmDurationMonth = (months) => {
-  console.log(MESSAGES.CONFIRM_DURATION + months + " months?");
-  return ynq();
+  return input;
 };
 
 let isValidMonth = (month) => {
@@ -273,15 +266,32 @@ let getAndValidateMonths = () => {
     input = formatNumber(input);
   } while (!isValidMonth(input));
 
-  if (confirmDurationMonth(input)) {
-    return input;
+  return input;
+};
+
+let confirmDuration = (loan) => {
+  console.log(MESSAGES.CONFIRM_DURATIONS[0]
+    + String(loan.durationYears)
+    + MESSAGES.CONFIRM_DURATIONS[1]
+    + String(loan.durationMonths)
+    + MESSAGES.CONFIRM_DURATIONS[2]);
+
+  return ynq();
+};
+
+let getAndValidateDuration = (loan) => {
+  loan.durationYears = getAndValidateYear();
+  loan.durationMonths = getAndValidateMonths();
+
+  if (confirmDuration(loan)) {
+    return undefined;
   } else {
-    return getAndValidateMonths();
+    return getAndValidateDuration(loan);
   }
 };
 
 let confirmPPY = (PPY) => {
-  console.log(MESSAGES.CONFIRM_PPY + PPY + " payments per year?");
+  console.log(MESSAGES.CONFIRM_PPY[0] + PPY + MESSAGES.CONFIRM_PPY[1]);
   return ynq();
 };
 
@@ -331,15 +341,13 @@ if (ynq()) {
     }
     if (!QUIT) {
       console.log(MESSAGES.START_DURATION);
-      loanTerms.durationYears = getAndValidateYear();
-      loanTerms.durationMonths = getAndValidateMonths();
+      getAndValidateDuration(loanTerms);
     }
     if (!QUIT) {
       loanTerms.paymentsPerYear = getAndValidatePaymentsPerYear();
     }
     if (!QUIT) {
-      loanTerms.totalPayments = setTotalPayments(loanTerms.durationYears,
-        loanTerms.durationMonths);
+      loanTerms.totalPayments = setTotalPayments(loanTerms);
 
       loanTerms.ratePerPayment = setRate(loanTerms.annualRate,
         loanTerms.compoundingPeriodsPerYear, loanTerms.paymentsPerYear);
@@ -347,6 +355,8 @@ if (ynq()) {
       loanTerms.paymentSize = calcAmortization(loanTerms);
 
       console.log(MESSAGES.REGULAR_PAYMENT + loanTerms.paymentSize + '\n');
+
+      console.log(loanTerms);
     }
     if (!QUIT) {
       console.log(MESSAGES.NEW_CALCULATION);
@@ -356,5 +366,3 @@ if (ynq()) {
 }
 console.log(MESSAGES.GOODBYE);
 //===================================================================PROGRAM END
-
-//Display amortization.

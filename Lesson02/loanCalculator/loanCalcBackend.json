@@ -10,14 +10,18 @@
     "START_APR": "What's your APR? Give it as a percentage without the '%' (i.e. '5' instead of '0.05' for 5%).",
     "REQUEST_APR": "APR: ",
     "CONFIRM_APR": "Let's double check. Your APR for this loan should be ", 
-    "START_COMPOUNDING": "Will this loan be compounded monthly? Y for 'yes', N for 'no'",
+    "START_COMPOUNDING": "Will this loan be compounded monthly? Y for 'yes', N for 'no': ",
     "SELECT_COMPOUNDING": "Okay, here are some other compounding options. Select the number that corresponds to your loan:\n\t1) Annually\n\t2) Semi-annually\n\t3) Quarterly\n\t4) Semi-monthly\n\t5) Biweekly\n\t6) Weekly\n\t7) Daily\n\t8) Other\n\nSelect 1-8: ",
     "GET_CUSTOM_COMPOUNDING": "How many compounding periods per year? Positive values less than 1 are ok: ",
     "CONFIRM_COMPOUNDING": "Let's be sure we got this right. Your loan should be compounded ",
-    "START_DURATION": "Last question: How long will you be repaying this loan?  You can  give me the number of years and months you expect to be paying.",
+    "START_DURATION": "Almost done! How long will you be repaying this loan?  You can  give me the number of years and months you expect to be paying.",
     "REQUEST_DURATION_YEARS": "Years: ",
     "REQUEST_DURATION_MONTHS": "Months: ",
     "CONFIRM_DURATION": "You expect to repay this loan over ",
+    "REGULAR_PAYMENT":  "\nYour regular payment should be $",
+    "PAY_PER_YEAR": "Last question: How many payments do you plan on making per year? ",
+    "REQUEST_PPY": "Payments per year: ",
+    "CONFIRM_PPY": "You would like to make ",
     "YNQ": "Y/N/Q: "
   },
   "ERRORS": {
@@ -29,8 +33,9 @@
     "INVALID_COMPOUNDING": "ERROR: Compounding periods need to be greater than 0",
     "NEG_YEAR": "ERROR: Please provide a non-negative number of years",
     "NON_INT_YEAR": "ERROR: Please provide a whole number year",
-    "NOT_ENOUGH_TIME": "ERROR: Please provide at least 1 month for payment.",
     "NEG_MONTH": "ERROR: Please provide a non-negative number of months",
-    "NON_INT_MONTH": "ERROR: Please provide a whole number month"
+    "NOT_ENOUGH_TIME": "ERROR: Please provide at least 1 month to payment",
+    "NON_INT_MONTH": "ERROR: Please provide a whole number month",
+    "NEG_PPY": "ERROR: Please provide a positive number of expected payments"
   }
 }

@@ -1,10 +1,9 @@
 let readline = require('readline-sync');
-let BACKEND = require('./loanCalcBackend.json');
-let MESSAGES = BACKEND.MESSAGES;
-let ERRORS = BACKEND.ERRORS;
+const BACKEND = require('./loanCalcBackend.json');
+const MESSAGES = BACKEND.MESSAGES;
+const ERRORS = BACKEND.ERRORS;
 
 let loanTerms = {
-  QUIT:  false,
   amount: null,
   annualRate: null,
   durationYears: null,
@@ -17,9 +16,8 @@ let loanTerms = {
 };
 
 let setRate = (loan) => {
-  loan.ratePerPayment = Math.pow(1 +
-    (loan.annualRate / loan.compoundingPeriodsPerYear),
-    loan.compoundingPeriodsPerYear / loan.paymentsPerYear) - 1;
+  let ratio = loan.annualRate / loan.compoundingPeriodsPerYear;
+  loan.ratePerPayment = Math.pow(1 + ratio, ratio) - 1;
 };
 
 let setTotalPayments = (loan) => {
@@ -37,37 +35,6 @@ let calcAmortization = (loan) => {
   payment *= Math.pow(1 + loan.ratePerPayment, loan.totalPayments);
   payment /= (Math.pow(1 + loan.ratePerPayment, loan.totalPayments) - 1);
   loan.paymentSize = payment.toFixed(2);
-};
-
-let isYnq = (input) => {
-  if (input === 'Y' || input === 'N' || input === 'Q') {
-    return true;
-  } else {
-    console.log(ERRORS.YNQ);
-    return false;
-  }
-};
-
-let ynq = (loan) => {
-  let input;
-  do {
-    input = readline.question(MESSAGES.YNQ);
-    input = input.trimStart().toUpperCase();
-  } while (!isYnq(input));
-
-  switch (input) {
-    case 'Y':
-      console.clear();
-      return true;
-    case 'N':
-      return false;
-    case 'Q':
-      loan.QUIT = true;
-      return false;
-    default:
-      console.log(ERRORS.YNQ);
-      return ynq(loan);
-  }
 };
 
 let formatNumber = (num) => {
@@ -88,13 +55,7 @@ let isValidLoanAmt = (num) => {
   }
 };
 
-let confirmLoanAmount = (amount, loan) => {
-  console.log(MESSAGES.CONFIRM_LOAN_AMOUNT + amount);
-  return ynq(loan);
-};
-
 let getAndValidateLoanAmount = (loan) => {
-  if (loan.QUIT) return undefined;
   console.log(MESSAGES.START_LOAN_AMOUNT);
   if (loan.QUIT) return undefined;
   let input;
@@ -103,12 +64,7 @@ let getAndValidateLoanAmount = (loan) => {
     input = formatNumber(input);
   } while (!isValidLoanAmt(input));
 
-  if (confirmLoanAmount(input, loan)) {
-    loan.amount = input;
-    return undefined;
-  } else {
-    return getAndValidateLoanAmount(loan);
-  }
+  loan.amount = input;
 };
 
 let isValidAPR = (num) => {
@@ -123,13 +79,7 @@ let isValidAPR = (num) => {
   }
 };
 
-let confirmAPR = (percent, loan) => {
-  console.log(MESSAGES.CONFIRM_APR[0] + percent + MESSAGES.CONFIRM_APR[1]);
-  return ynq(loan);
-};
-
 let getAndValidateAPR = (loan) => {
-  if (loan.QUIT) return undefined;
   console.log(MESSAGES.START_APR);
   if (loan.QUIT) return undefined;
   let input;
@@ -138,12 +88,7 @@ let getAndValidateAPR = (loan) => {
     input = formatNumber(input);
   } while (!isValidAPR(input));
 
-  if (confirmAPR(input, loan)) {
-    loan.annualRate = input / 100;
-    return undefined;
-  } else {
-    return getAndValidateAPR(loan);
-  }
+  loanTerms.annualRate = input / 100;
 };
 
 let isValidCompounding = (num) => {
@@ -158,71 +103,37 @@ let isValidCompounding = (num) => {
   }
 };
 
-let confirmCompounding = (compoundings, loan) => {
-  console.log(MESSAGES.CONFIRM_COMPOUNDING[0]
-    + compoundings
-    + MESSAGES.CONFIRM_COMPOUNDING[1]);
-  return ynq(loan);
-};
-
-// eslint-disable-next-line max-lines-per-function
 let getCustomCompounding = (loan) => {
-  if (loan.QUIT) return undefined;
-  let selection = readline.question(MESSAGES.SELECT_COMPOUNDING);
+  let selection = parseInt(readline.question(MESSAGES.SELECT_COMPOUNDING), 10);
   let compounding;
-  switch (selection) {
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-      compounding = BACKEND.COMPOUNDING_PERIODS[Number(selection)];
-      if (confirmCompounding(compounding, loan)) {
-        loan.compoundingPeriodsPerYear = compounding;
-        return undefined;
-      } else {
-        return getCustomCompounding(loan);
-      }
-    case '8':
-      do {
-        compounding = readline.question(MESSAGES.GET_CUSTOM_COMPOUNDING);
-        compounding = formatNumber(compounding);
-      } while (!isValidCompounding(compounding));
-      if (confirmCompounding(compounding, loan)) {
-        loan.compoundingPeriodsPerYear = compounding;
-        return undefined;
-      } else {
-        return getCustomCompounding(loan);
-      }
-    default:
-      console.log(ERRORS.INVALID_SELECTION);
-      return getCustomCompounding(loan);
+  if (1 <= selection && selection <= 7) {
+    loan.compoundingPeriodsPerYear = BACKEND
+      .COMPOUNDING_PERIODS[Number(selection)];
+  } else if (selection === 8) {
+    do {
+      compounding = readline.question(MESSAGES.GET_CUSTOM_COMPOUNDING);
+      compounding = Number(compounding);
+    } while (!isValidCompounding(compounding));
+    loan.compoundingPeriodsPerYear = compounding;
+  } else {
+    console.log(ERRORS.INVALID_SELECTION);
+    getCustomCompounding(loan);
   }
 };
 
-// eslint-disable-next-line max-lines-per-function
 let getAndValidateCompounding = (loan) => {
-  if (loan.QUIT) return undefined;
   let selection = readline.question(MESSAGES.START_COMPOUNDING);
   selection = selection.toUpperCase();
   switch (selection) {
     case 'Y':
-      if (confirmCompounding(BACKEND.COMPOUNDING_PERIODS[0], loan)) {
-        loan.compoundingPeriodsPerYear = BACKEND.COMPOUNDING_PERIODS[0];
-        return undefined;
-      } else {
-        return getAndValidateCompounding(loan);
-      }
+      loan.compoundingPeriodsPerYear = BACKEND.COMPOUNDING_PERIODS[0];
+      break;
     case 'N':
-      return getCustomCompounding(loan);
-    case 'Q':
-      loan.QUIT = true;
-      return undefined;
+      getCustomCompounding(loan);
+      break;
     default:
       console.log(ERRORS.YNQ);
-      return getAndValidateCompounding(loan);
+      getAndValidateCompounding(loan);
   }
 };
 
@@ -242,7 +153,6 @@ let isValidYear = (year) => {
 };
 
 let getAndValidateYear = (loan) => {
-  if (loan.QUIT) return undefined;
   let input;
   do {
     input = readline.question(MESSAGES.REQUEST_DURATION_YEARS);
@@ -250,7 +160,6 @@ let getAndValidateYear = (loan) => {
   } while (!isValidYear(input));
 
   loan.durationYears = input;
-  return undefined;
 };
 
 let isValidMonth = (month) => {
@@ -280,39 +189,15 @@ let getAndValidateMonths = (loan) => {
   } while (!isValidMonth(input));
 
   loan.durationMonths = input;
-  return undefined;
-};
-
-let confirmDuration = (loan) => {
-  console.log(MESSAGES.CONFIRM_DURATIONS[0]
-    + String(loan.durationYears)
-    + MESSAGES.CONFIRM_DURATIONS[1]
-    + String(loan.durationMonths)
-    + MESSAGES.CONFIRM_DURATIONS[2]);
-
-  return ynq(loan);
 };
 
 let getAndValidateDuration = (loan) => {
-  if (loan.QUIT) return undefined;
   console.log(MESSAGES.START_DURATION);
-  if (loan.QUIT) return undefined;
   getAndValidateYear(loan);
   getAndValidateMonths(loan);
-
-  if (confirmDuration(loan)) {
-    return undefined;
-  } else {
-    return getAndValidateDuration(loan);
-  }
 };
 
-let confirmPPY = (PPY, loan) => {
-  console.log(MESSAGES.CONFIRM_PPY[0] + PPY + MESSAGES.CONFIRM_PPY[1]);
-  return ynq(loan);
-};
-
-let isValidPPY = (PPY) => {
+let isValidPaymentPerYear = (PPY) => {
   if (Number.isNaN(PPY)) {
     console.log(ERRORS.NAN);
     return false;
@@ -325,59 +210,46 @@ let isValidPPY = (PPY) => {
 };
 
 let getAndValidatePaymentsPerYear = (loan) => {
-  if (loan.QUIT) return undefined;
   let input;
   console.log(MESSAGES.PAY_PER_YEAR);
   do {
     input = readline.question(MESSAGES.REQUEST_PPY);
     input = formatNumber(input);
-  } while (!isValidPPY(input));
+  } while (!isValidPaymentPerYear(input));
 
-  if (confirmPPY(input, loan)) {
-    loan.paymentsPerYear = input;
-    return undefined;
-  } else {
-    return getAndValidatePaymentsPerYear(loan);
-  }
+  loan.paymentsPerYear = input;
 };
 
 let displayResults = (loan) => {
-  if (!loan.QUIT) {
-    console.log(MESSAGES.REGULAR_PAYMENT + loan.paymentSize);
-  }
+  console.log(MESSAGES.REGULAR_PAYMENT + loan.paymentSize);
 };
 
-let newLoan = (loan) => {
-  if (!loan.QUIT) {
-    console.log(MESSAGES.NEW_CALCULATION);
-  }
-};
-
-let quitCheck = (method, object, quit) => {
-  if (quit) {
-    return undefined;
-  } else {
-    method(object);
-    return undefined;
+let calculateNewLoan = () => {
+  let choice = readline.question(MESSAGES.NEW_CALCULATION);
+  switch (choice.toUpperCase()) {
+    case 'Y':
+      return true;
+    case 'N':
+      return false;
+    default:
+      console.log(ERRORS.INVALID_SELECTION);
+      return calculateNewLoan();
   }
 };
 
 //=================================================================PROGRAM START
 console.log(MESSAGES.GREET);
-if (ynq(loanTerms)) {
-  do {
-    quitCheck(getAndValidateLoanAmount, loanTerms, loanTerms.QUIT);
-    quitCheck(getAndValidateAPR, loanTerms, loanTerms.QUIT);
-    quitCheck(getAndValidateCompounding, loanTerms, loanTerms.QUIT);
-    quitCheck(getAndValidateDuration, loanTerms, loanTerms.QUIT);
-    quitCheck(getAndValidatePaymentsPerYear, loanTerms, loanTerms.QUIT);
-    quitCheck(setRate, loanTerms, loanTerms.QUIT);
-    quitCheck(setTotalPayments, loanTerms, loanTerms.QUIT);
-    quitCheck(calcAmortization, loanTerms, loanTerms.QUIT);
-    quitCheck(displayResults, loanTerms, loanTerms.QUIT);
-    quitCheck(newLoan, loanTerms, loanTerms.QUIT);
-  // eslint-disable-next-line no-unmodified-loop-condition
-  } while (loanTerms.QUIT !== true && ynq(loanTerms) !== false);
-}
+do {
+  getAndValidateLoanAmount(loanTerms);
+  getAndValidateAPR(loanTerms);
+  getAndValidateCompounding(loanTerms);
+  getAndValidateDuration(loanTerms);
+  getAndValidatePaymentsPerYear(loanTerms);
+  setRate(loanTerms);
+  setTotalPayments(loanTerms);
+  calcAmortization(loanTerms);
+  displayResults(loanTerms);
+  console.log(loanTerms);
+} while (calculateNewLoan());
 console.log(MESSAGES.GOODBYE);
 //===================================================================PROGRAM END

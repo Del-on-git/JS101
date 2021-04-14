@@ -3,26 +3,20 @@
   "MESSAGES": {
     "GREET": "Welcome to the Loanly Calculator!\nI'll help you navigate your future loan payments. Please be sure to read the prompts carefully before responding, and try to have fun!\nReady?",
     "START_LOAN_AMOUNT": "Let's get started by asking a few simple questions.\nFirst, how much would you like to borrow?",
-    "NEW_CALCULATION": "Would you like to calculate the amortization of a new loan?",
+    "NEW_CALCULATION": "Would you like to calculate the amortization of a new loan? (Y/N): ",
     "GOODBYE": "Thanks for using Loanly. Goodbye!",
     "REQUEST_LOAN_AMOUNT": "Loan amount: $",
-    "CONFIRM_LOAN_AMOUNT": "Okay, got it.\nJust to be sure, you would like to borrow the following amount: $",
     "START_APR": "\nWhat's your APR? Give it as a percentage without the '%' (i.e. '5' instead of '0.05' for 5%).",
     "REQUEST_APR": "APR: ",
-    "CONFIRM_APR": ["Let's double check. Your APR for this loan should be ", "%"],
     "START_COMPOUNDING": "\nWill this loan be compounded monthly? Y for 'yes', N for 'no': ",
     "SELECT_COMPOUNDING": "Okay, here are some other compounding options. Select the number that corresponds to your loan:\n\t1) Annually\n\t2) Semi-annually\n\t3) Quarterly\n\t4) Semi-monthly\n\t5) Biweekly\n\t6) Weekly\n\t7) Daily\n\t8) Other\n\nSelect 1-8: ",
     "GET_CUSTOM_COMPOUNDING": "How many compounding periods per year? Positive values less than 1 are ok: ",
-    "CONFIRM_COMPOUNDING": ["Let's be sure we got this right. Your loan should be compounded ", " times per year?"],
     "START_DURATION": "\nAlmost done! How long will you be repaying this loan?  You can  give me the number of years and months you expect to be paying.",
     "REQUEST_DURATION_YEARS": "Years: ",
     "REQUEST_DURATION_MONTHS": "Months: ",
-    "CONFIRM_DURATIONS": ["You expect to repay this loan over ", " years and ", " months?"],
     "REGULAR_PAYMENT":  "\n\tYour regular payment should be $",
     "PAY_PER_YEAR": "\nLast question: How many payments do you plan on making per year? ",
-    "REQUEST_PPY": "Payments per year: ",
-    "CONFIRM_PPY": ["You would like to make ", " payments per year?"],
-    "YNQ": "Y/N/Q: "
+    "REQUEST_PAYMENT_PER_YEAR": "Payments per year: "
   },
   "ERRORS": {
     "NAN": "ERROR: Your input is not a number.",

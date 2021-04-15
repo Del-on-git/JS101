@@ -58,7 +58,6 @@ let isValidLoanAmt = (num) => {
 
 let getAndValidateLoanAmount = (loan) => {
   console.log(MESSAGES.START_LOAN_AMOUNT);
-  if (loan.QUIT) return undefined;
   let input;
   do {
     input = readline.question(MESSAGES.REQUEST_LOAN_AMOUNT);
@@ -82,14 +81,13 @@ let isValidAPR = (num) => {
 
 let getAndValidateAPR = (loan) => {
   console.log(MESSAGES.START_APR);
-  if (loan.QUIT) return undefined;
   let input;
   do {
     input = readline.question(MESSAGES.REQUEST_APR);
     input = formatNumber(input);
   } while (!isValidAPR(input));
 
-  loanTerms.annualRate = input / 100;
+  loan.annualRate = input / 100;
 };
 
 let isValidCompounding = (num) => {
@@ -182,7 +180,6 @@ let isValidMonth = (month) => {
 };
 
 let getAndValidateMonths = (loan) => {
-  if (loan.QUIT) return undefined;
   let input;
   do {
     input = readline.question(MESSAGES.REQUEST_DURATION_MONTHS);

@@ -16,8 +16,9 @@ let loanTerms = {
 };
 
 let setRate = (loan) => {
-  let ratio = loan.annualRate / loan.compoundingPeriodsPerYear;
-  loan.ratePerPayment = Math.pow(1 + ratio, ratio) - 1;
+  let ratioOne = loan.annualRate / loan.compoundingPeriodsPerYear;
+  let ratioTwo = loan.compoundingPeriodsPerYear / loan.paymentsPerYear;
+  loan.ratePerPayment = Math.pow(1 + ratioOne, ratioTwo) - 1;
 };
 
 let setTotalPayments = (loan) => {
@@ -197,12 +198,12 @@ let getAndValidateDuration = (loan) => {
   getAndValidateMonths(loan);
 };
 
-let isValidPaymentPerYear = (PPY) => {
-  if (Number.isNaN(PPY)) {
+let isValidPaymentPerYear = (paymentsPerYear) => {
+  if (Number.isNaN(paymentsPerYear)) {
     console.log(ERRORS.NAN);
     return false;
-  } else if (PPY <= 0) {
-    console.log(ERRORS.NEG_PPY);
+  } else if (paymentsPerYear <= 0) {
+    console.log(ERRORS.NEG_PAYMENTS_PER_YEAR);
     return false;
   } else {
     return true;
@@ -249,7 +250,6 @@ do {
   setTotalPayments(loanTerms);
   calcAmortization(loanTerms);
   displayResults(loanTerms);
-  console.log(loanTerms);
 } while (calculateNewLoan());
 console.log(MESSAGES.GOODBYE);
 //===================================================================PROGRAM END

@@ -211,7 +211,7 @@ let getAndValidatePaymentsPerYear = (loan) => {
   let input;
   console.log(MESSAGES.PAY_PER_YEAR);
   do {
-    input = readline.question(MESSAGES.REQUEST_PPY);
+    input = readline.question(MESSAGES.REQUEST_PAYMENT_PER_YEAR);
     input = formatNumber(input);
   } while (!isValidPaymentPerYear(input));
 
@@ -226,6 +226,7 @@ let calculateNewLoan = () => {
   let choice = readline.question(MESSAGES.NEW_CALCULATION);
   switch (choice.toUpperCase()) {
     case 'Y':
+      console.clear();
       return true;
     case 'N':
       return false;

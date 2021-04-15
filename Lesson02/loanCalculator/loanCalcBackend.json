@@ -30,6 +30,6 @@
     "NEG_MONTH": "ERROR: Please provide a non-negative number of months",
     "NOT_ENOUGH_TIME": "ERROR: Please provide at least 1 month to payment",
     "NON_INT_MONTH": "ERROR: Please provide a whole number month",
-    "NEG_PPY": "ERROR: Please provide a positive number of expected payments"
+    "NEG_PAYMENTS_PER_YEAR": "ERROR: Please provide a positive number of expected payments"
   }
 }

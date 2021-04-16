@@ -21,16 +21,19 @@ function isValidChoice(choice) {
 
 function getChoiceKey(choice) {
   let choiceKey;
+
   for (let key in OUTCOMES) {
     if (key[0] === choice) {
       choiceKey = key;
     }
   }
+
   return choiceKey;
 }
 
 function getAndValidateUserChoice() {
   let input;
+
   do {
     input = readline.question(MESSAGES.PLAYER_CHOICE);
     input = input.toUpperCase();
@@ -41,6 +44,7 @@ function getAndValidateUserChoice() {
 
 function getOpponentChoice() {
   let machineChoiceIdx = Math.floor(Math.random() * 10) % 3;
+
   return MACHINE_CHOICES[machineChoiceIdx];
 }
 
@@ -55,6 +59,7 @@ function drawn(matchResult) {
 function playAgain() {
   let input = readline.question(MESSAGES.PLAY_AGAIN);
   input = input.toUpperCase();
+
   switch (input) {
     case 'Y':
       console.clear();
@@ -67,15 +72,25 @@ function playAgain() {
   }
 }
 
+function display(result, playerChoice, opponentChoice) {
+  //TODO: Write display
+}
+
 function play() {
-  console.log(MESSAGES.GREET);
   let matchResult;
+
+  console.log(MESSAGES.GREET);
+
   do {
     let playerChoice = getAndValidateUserChoice();
     let opponentChoice = getOpponentChoice();
+
     matchResult = getOutcome(playerChoice, opponentChoice);
-    console.log(matchResult);
+
+    display(matchResult, playerChoice, opponentChoice);
+
   } while (drawn(matchResult) || playAgain());
+
   console.log(MESSAGES.GOODBYE);
 }
 

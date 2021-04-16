@@ -1,20 +1,21 @@
 {
   "ART": {
-    "ROCK": ["    _______", "---'   ____)", "      (_____)", "      (_____)", "      (____)", "---.__(___)"],
-    "PAPER": ["    _______", "---'   ____)____", "          ______)", "          _______)", "         _______)", "---.__________)"],
-    "SCISSORS": ["    _______", "---'   ____)____", "          ______)", "       __________)", "      (____)", "---.__(___)"]
+   //TODO: FIX ART
   },
+  "MACHINE_CHOICES": ["ROCK", "PAPER", "SCISSORS"],
   "OUTCOMES": {
-    "ROCK_V": { "ROCK": "Draw!", "PAPER": "You win!", "SCISSORS": "You lose!" },
+    "ROCK_V": { "ROCK": "Draw!", "PAPER": "You lose!", "SCISSORS": "You win!" },
     "PAPER_V": { "ROCK": "You win!", "PAPER": "Draw!", "SCISSORS": "You lose!" },
     "SCISSORS_V": {"ROCK": "You lose!", "PAPER": "You win!", "SCISSORS": "You lose!" }
   },
   "MESSAGES": {
-    "GREET": "Welcome to Rock, Paper, Scissors!",
+    "GREET": "Welcome to Rock, Paper, Scissors! For the best experience, maximize this window.",
     "GOODBYE": "Thanks for playing, champ! Goodbye!",
-    "PLAYER_CHOICE": "Choose your weapon! R/P/S: "
+    "PLAYER_CHOICE": "Choose your weapon! R/P/S: ",
+    "PLAY_AGAIN": "Would you like to play again? Y/N: "
   },
   "ERRORS": {
-    "INVALID_CHOICE": "It's rock-paper-scissors, not rock-paper-scissors-lizzard-spock.\nTry again and..."
+    "INVALID_CHOICE": "It's rock-paper-scissors, not rock-paper-scissors-lizzard-spock.\nTry again and...",
+    "NOT_Y/N": "You must select 'Y' for Yes or 'N' for No."
   }
 }

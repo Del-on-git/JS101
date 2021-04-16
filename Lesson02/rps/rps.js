@@ -4,9 +4,11 @@ const BACKEND = require('./rpsBackend.json');
 const MESSAGES = BACKEND.MESSAGES;
 const OUTCOMES = BACKEND.OUTCOMES;
 const ERRORS = BACKEND.ERRORS;
+const MACHINE_CHOICES = BACKEND.MACHINE_CHOICES;
 const ROCK = 'R';
 const PAPER = 'P';
 const SCISSORS = 'S';
+const DRAW = "Draw!";
 
 function isValidChoice(choice) {
   if (choice === ROCK || choice === PAPER || choice === SCISSORS) {
@@ -17,6 +19,16 @@ function isValidChoice(choice) {
   }
 }
 
+function getChoiceKey(choice) {
+  let choiceKey;
+  for (let key in OUTCOMES) {
+    if (key[0] === choice) {
+      choiceKey = key;
+    }
+  }
+  return choiceKey;
+}
+
 function getAndValidateUserChoice() {
   let input;
   do {
@@ -24,9 +36,48 @@ function getAndValidateUserChoice() {
     input = input.toUpperCase();
   } while (!isValidChoice(input));
 
-  return input;
+  return getChoiceKey(input);
 }
 
-function opponentChoice() {
-  //TODO: generate a random number between 0 and 2 inclusive
+function getOpponentChoice() {
+  let machineChoiceIdx = Math.floor(Math.random() * 10) % 3;
+  return MACHINE_CHOICES[machineChoiceIdx];
 }
+
+function getOutcome(playerChoice, opponentChoice) {
+  return OUTCOMES[playerChoice][opponentChoice];
+}
+
+function drawn(matchResult) {
+  return matchResult === DRAW;
+}
+
+function playAgain() {
+  let input = readline.question(MESSAGES.PLAY_AGAIN);
+  input = input.toUpperCase();
+  switch (input) {
+    case 'Y':
+      console.clear();
+      return true;
+    case 'N':
+      return false;
+    default:
+      console.log(ERRORS['NOT_Y/N']);
+      return playAgain();
+  }
+}
+
+function play() {
+  console.log(MESSAGES.GREET);
+  let matchResult;
+  do {
+    let playerChoice = getAndValidateUserChoice();
+    let opponentChoice = getOpponentChoice();
+    matchResult = getOutcome(playerChoice, opponentChoice);
+    console.log(matchResult);
+  } while (drawn(matchResult) || playAgain());
+  console.log(MESSAGES.GOODBYE);
+}
+
+//================================================================PROGRAM START
+play();

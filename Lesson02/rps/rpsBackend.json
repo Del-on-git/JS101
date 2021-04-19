@@ -8,7 +8,7 @@
     "K_SPOCK_V": {"ROCK": "You win!", "PAPER": "You lose!", "SCISSORS": "You win!", "LIZARD": "You lose!", "SPOCK": "Draw!"}
   },
   "MESSAGES": {
-    "GREET": "Welcome to Rock, Paper, Scissors! For the best experience, maximize this window.",
+    "GREET": "Welcome to Rock, Paper, Scissors, Lizard, Spock! For the best experience, maximize this window.",
     "GOODBYE": "Thanks for playing, champ! Goodbye!",
     "PLAYER_CHOICE": "Choose your weapon! (R)ock/(P)aper/(S)cissors/(L)izard/spoc(K): ",
     "PLAY_AGAIN": "Would you like to play again? Y/N: "

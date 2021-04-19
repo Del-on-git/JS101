@@ -4,7 +4,7 @@
     "R_ROCK_V": { "ROCK": "Draw!", "PAPER": "You lose!", "SCISSORS": "You win!", "LIZARD": "You win!", "SPOCK": "You lose!" },
     "P_PAPER_V": { "ROCK": "You win!", "PAPER": "Draw!", "SCISSORS": "You lose!", "LIZARD": "You lose!", "SPOCK": "You win!"},
     "S_SCISSORS_V": {"ROCK": "You lose!", "PAPER": "You win!", "SCISSORS": "Draw!", "LIZARD": "You win!", "SPOCK": "You lose!" },
-    "L_LIZARD_V": {"ROCK": "You lose!" , "PAPER": "You win!", "SCISSORS": "You lose!", "LIZARD": "Draw!", "SPOCK": "You Win!"},
+    "L_LIZARD_V": {"ROCK": "You lose!" , "PAPER": "You win!", "SCISSORS": "You lose!", "LIZARD": "Draw!", "SPOCK": "You win!"},
     "K_SPOCK_V": {"ROCK": "You win!", "PAPER": "You lose!", "SCISSORS": "You win!", "LIZARD": "You lose!", "SPOCK": "Draw!"}
   },
   "MESSAGES": {

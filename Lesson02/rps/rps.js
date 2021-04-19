@@ -4,17 +4,30 @@ const BACKEND = require('./rpsBackend.json');
 const MESSAGES = BACKEND.MESSAGES;
 const OUTCOMES = BACKEND.OUTCOMES;
 const ERRORS = BACKEND.ERRORS;
+const ART = BACKEND.ART;
 const MACHINE_CHOICES = BACKEND.MACHINE_CHOICES;
+const NUM_CHOICES = 5;
+const NUM_ROUNDS = 5;
+const CRITERION = Math.ceil(NUM_ROUNDS / 2);
 const ROCK = 'R';
 const PAPER = 'P';
 const SCISSORS = 'S';
-const DRAW = "Draw!";
+const LIZZARD = 'L';
+const SPOCK = 'K';
 
 function isValidChoice(choice) {
-  if (choice === ROCK || choice === PAPER || choice === SCISSORS) {
+  if ( choice === ROCK
+    || choice === PAPER
+    || choice === SCISSORS
+    || choice === LIZZARD
+    || choice === SPOCK) {
+
     return true;
+
   } else {
-    console.log(ERRORS.INVALID_CHOICE);
+    console.log(ERRORS.INVALID_CHOICE[0]
+      + choice.toString() + ERRORS.INVALID_CHOICE[1]);
+
     return false;
   }
 }
@@ -25,6 +38,7 @@ function getChoiceKey(choice) {
   for (let key in OUTCOMES) {
     if (key[0] === choice) {
       choiceKey = key;
+      break;
     }
   }
 
@@ -43,17 +57,13 @@ function getAndValidateUserChoice() {
 }
 
 function getOpponentChoice() {
-  let machineChoiceIdx = Math.floor(Math.random() * 10) % 3;
+  let machineChoiceIdx = Math.floor(Math.random() * 10) % NUM_CHOICES;
 
   return MACHINE_CHOICES[machineChoiceIdx];
 }
 
 function getOutcome(playerChoice, opponentChoice) {
   return OUTCOMES[playerChoice][opponentChoice];
-}
-
-function drawn(matchResult) {
-  return matchResult === DRAW;
 }
 
 function playAgain() {
@@ -72,27 +82,57 @@ function playAgain() {
   }
 }
 
-function display(result, playerChoice, opponentChoice) {
-  //TODO: Write display
+function display(result, playerChoice, opponentChoice, scores) {
+  console.log(ART[playerChoice][opponentChoice]);
+  console.log(ART[result]);
+  console.log(`You: ${scores.playerScore}, Machine: ${scores.opponentScore}`);
 }
 
-function play() {
-  let matchResult;
+function playMatch(scores) {
+  let playerChoice;
+  let opponentChoice;
+  let result;
 
-  console.log(MESSAGES.GREET);
+  playerChoice = getAndValidateUserChoice();
+  opponentChoice = getOpponentChoice();
+  result = getOutcome(playerChoice, opponentChoice);
 
-  do {
-    let playerChoice = getAndValidateUserChoice();
-    let opponentChoice = getOpponentChoice();
+  if (result === "You win!") {
+    scores.playerScore += 1;
+    display(result, playerChoice, opponentChoice, scores);
+  } else if (result === "You lose!") {
+    scores.opponentScore += 1;
+    display(result, playerChoice, opponentChoice, scores);
+  } else {
+    display(result, playerChoice, opponentChoice, scores);
+  }
+}
 
-    matchResult = getOutcome(playerChoice, opponentChoice);
+function declareWinner(scores) {
+  if (scores.playerScore > scores.opponentScore) {
+    console.log(ART["Congratulations"]);
+  } else {
+    console.log(ART["Bummer"]);
+  }
+}
 
-    display(matchResult, playerChoice, opponentChoice);
+function playRound() {
+  let scores = { playerScore: 0, opponentScore: 0};
 
-  } while (drawn(matchResult) || playAgain());
+  while (scores.playerScore < CRITERION && scores.opponentScore < CRITERION) {
+    playMatch(scores);
+  }
 
-  console.log(MESSAGES.GOODBYE);
+  declareWinner(scores);
+
+  if (playAgain()) {
+    console.clear();
+    playRound();
+  } else {
+    console.log(MESSAGES.GOODBYE);
+  }
 }
 
 //================================================================PROGRAM START
-play();
+console.log(MESSAGES.GREET);
+playRound();

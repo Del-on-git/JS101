@@ -1,3 +1,4 @@
+//==========================================================DECLARATIONS & INITS
 let readline = require('readline-sync');
 
 const BACKEND = require('./rpsBackend.json');
@@ -15,6 +16,7 @@ const SCISSORS = 'S';
 const LIZZARD = 'L';
 const SPOCK = 'K';
 
+//========================================================GETTING USER SELECTION
 function isValidChoice(choice) {
   if ( choice === ROCK
     || choice === PAPER
@@ -56,38 +58,14 @@ function getAndValidateUserChoice() {
   return getChoiceKey(input);
 }
 
+//=====================================================GETTING MACHINE SELECTION
 function getOpponentChoice() {
   let machineChoiceIdx = Math.floor(Math.random() * 10) % NUM_CHOICES;
 
   return MACHINE_CHOICES[machineChoiceIdx];
 }
 
-function getOutcome(playerChoice, opponentChoice) {
-  return OUTCOMES[playerChoice][opponentChoice];
-}
-
-function playAgain() {
-  let input = readline.question(MESSAGES.PLAY_AGAIN);
-  input = input.toUpperCase();
-
-  switch (input) {
-    case 'Y':
-      console.clear();
-      return true;
-    case 'N':
-      return false;
-    default:
-      console.log(ERRORS['NOT_Y/N']);
-      return playAgain();
-  }
-}
-
-function display(result, playerChoice, opponentChoice, scores) {
-  console.log(ART[playerChoice][opponentChoice]);
-  console.log(ART[result]);
-  console.log(`You: ${scores.playerScore}, Machine: ${scores.opponentScore}`);
-}
-
+//======================================================================GAMEPLAY
 function playMatch(scores) {
   let playerChoice;
   let opponentChoice;
@@ -108,12 +86,8 @@ function playMatch(scores) {
   }
 }
 
-function declareWinner(scores) {
-  if (scores.playerScore > scores.opponentScore) {
-    console.log(ART["Congratulations"]);
-  } else {
-    console.log(ART["Bummer"]);
-  }
+function getOutcome(playerChoice, opponentChoice) {
+  return OUTCOMES[playerChoice][opponentChoice];
 }
 
 function playRound() {
@@ -133,6 +107,36 @@ function playRound() {
   }
 }
 
-//================================================================PROGRAM START
+function display(result, playerChoice, opponentChoice, scores) {
+  console.log(ART[playerChoice][opponentChoice]);
+  console.log(ART[result]);
+  console.log(`You: ${scores.playerScore}, Machine: ${scores.opponentScore}`);
+}
+
+function declareWinner(scores) {
+  if (scores.playerScore > scores.opponentScore) {
+    console.log(ART["Congratulations"]);
+  } else {
+    console.log(ART["Bummer"]);
+  }
+}
+
+function playAgain() {
+  let input = readline.question(MESSAGES.PLAY_AGAIN);
+  input = input.toUpperCase();
+
+  switch (input) {
+    case 'Y':
+      console.clear();
+      return true;
+    case 'N':
+      return false;
+    default:
+      console.log(ERRORS['NOT_Y/N']);
+      return playAgain();
+  }
+}
+
+//=================================================================PROGRAM START
 console.log(MESSAGES.GREET);
 playRound();

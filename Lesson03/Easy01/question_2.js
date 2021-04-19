@@ -1,4 +1,5 @@
-//How can you determine whether a given string ends with an exclamation mark (!)?
+//How can you determine whether a given string ends with an
+//exclamation mark (!)?
 
 let endsWithBang1 = (str) => str.slice(-1) === '!';
 

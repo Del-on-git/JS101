@@ -3,10 +3,11 @@ let readline = require('readline-sync');
 
 const BACKEND = require('./rpsBackend.json');
 const MESSAGES = BACKEND.MESSAGES;
-const OUTCOMES = BACKEND.OUTCOMES;
 const ERRORS = BACKEND.ERRORS;
 const ART = BACKEND.ART;
-const MACHINE_CHOICES = BACKEND.MACHINE_CHOICES;
+const WIN = "You win!";
+const LOSE = "You lose!";
+const DRAW = "Draw!";
 const NUM_CHOICES = 5;
 const NUM_ROUNDS = 5;
 const CRITERION = Math.ceil(NUM_ROUNDS / 2);
@@ -15,6 +16,14 @@ const PAPER = 'P';
 const SCISSORS = 'S';
 const LIZZARD = 'L';
 const SPOCK = 'K';
+const MACHINE_CHOICES = ['R', 'P', 'S', 'L', 'K'];
+const WINNING_OUTCOMES = {
+  R: [ 'S', 'L' ],
+  P: [ 'K', 'R' ],
+  S: [ 'P', 'L' ],
+  L: [ 'K', 'P '],
+  K: [ 'S', 'R']
+};
 
 //========================================================GETTING USER SELECTION
 function isValidChoice(choice) {
@@ -34,19 +43,6 @@ function isValidChoice(choice) {
   }
 }
 
-function getChoiceKey(choice) {
-  let choiceKey;
-
-  for (let key in OUTCOMES) {
-    if (key[0] === choice) {
-      choiceKey = key;
-      break;
-    }
-  }
-
-  return choiceKey;
-}
-
 function getAndValidateUserChoice() {
   let input;
 
@@ -55,7 +51,7 @@ function getAndValidateUserChoice() {
     input = input.toUpperCase();
   } while (!isValidChoice(input));
 
-  return getChoiceKey(input);
+  return input;
 }
 
 //=====================================================GETTING MACHINE SELECTION
@@ -75,10 +71,10 @@ function playMatch(scores) {
   opponentChoice = getOpponentChoice();
   result = getOutcome(playerChoice, opponentChoice);
 
-  if (result === "You win!") {
+  if (result === WIN) {
     scores.playerScore += 1;
     display(result, playerChoice, opponentChoice, scores);
-  } else if (result === "You lose!") {
+  } else if (result === LOSE) {
     scores.opponentScore += 1;
     display(result, playerChoice, opponentChoice, scores);
   } else {
@@ -87,14 +83,24 @@ function playMatch(scores) {
 }
 
 function getOutcome(playerChoice, opponentChoice) {
-  return OUTCOMES[playerChoice][opponentChoice];
+  if (WINNING_OUTCOMES[playerChoice].includes(opponentChoice)) {
+    return WIN;
+  } else if (playerChoice === opponentChoice) {
+    return DRAW;
+  } else {
+    return LOSE;
+  }
 }
 
 function playRound() {
   let scores = { playerScore: 0, opponentScore: 0};
+  let round = 1;
 
   while (scores.playerScore < CRITERION && scores.opponentScore < CRITERION) {
+    console.log(MESSAGES.ROUND_PROMPT[0]
+      + round + MESSAGES.ROUND_PROMPT[1]);
     playMatch(scores);
+    round++;
   }
 
   declareWinner(scores);

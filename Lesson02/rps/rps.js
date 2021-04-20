@@ -11,12 +11,7 @@ const DRAW = "Draw!";
 const NUM_CHOICES = 5;
 const NUM_ROUNDS = 5;
 const CRITERION = Math.ceil(NUM_ROUNDS / 2);
-const ROCK = 'R';
-const PAPER = 'P';
-const SCISSORS = 'S';
-const LIZZARD = 'L';
-const SPOCK = 'K';
-const MACHINE_CHOICES = ['R', 'P', 'S', 'L', 'K'];
+const CHOICES = ['R', 'P', 'S', 'L', 'K'];
 const WINNING_OUTCOMES = {
   R: [ 'S', 'L' ],
   P: [ 'K', 'R' ],
@@ -27,11 +22,7 @@ const WINNING_OUTCOMES = {
 
 //========================================================GETTING USER SELECTION
 function isValidChoice(choice) {
-  if ( choice === ROCK
-    || choice === PAPER
-    || choice === SCISSORS
-    || choice === LIZZARD
-    || choice === SPOCK) {
+  if (CHOICES.includes(choice)) {
 
     return true;
 
@@ -58,7 +49,7 @@ function getAndValidateUserChoice() {
 function getOpponentChoice() {
   let machineChoiceIdx = Math.floor(Math.random() * 10) % NUM_CHOICES;
 
-  return MACHINE_CHOICES[machineChoiceIdx];
+  return CHOICES[machineChoiceIdx];
 }
 
 //======================================================================GAMEPLAY

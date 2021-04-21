@@ -15,7 +15,7 @@ console.log(statement2.split('').map((ele) => (ele === 't' ? ele : [])).flat().l
 
 console.log(statement1.split('').reduce( (accum, curVal) => {
   if (curVal === 't') {
-    accum.push('t');
+    accum++;
   }
   return accum;
-}, []).length);
+}, []));

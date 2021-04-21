@@ -12,3 +12,10 @@ console.log(statement2.split('').filter((char) => char === 't').length);
 
 console.log(statement1.split('').map((ele) => (ele === 't' ? ele : [])).flat().length);
 console.log(statement2.split('').map((ele) => (ele === 't' ? ele : [])).flat().length);
+
+console.log(statement1.split('').reduce( (accum, curVal) => {
+  if (curVal === 't') {
+    accum.push('t');
+  }
+  return accum;
+}, []).length);

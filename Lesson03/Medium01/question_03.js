@@ -15,7 +15,7 @@ function factors(number) {
 
 */
 
-function factors(number) {
+function factor(number) {
   if (number <= 0) {
     return [];
   } else if (number === 1) {
@@ -33,4 +33,4 @@ function factors(number) {
   return factors.sort((a, b) => a - b);
 }
 
-console.log(factors(330));
+console.log(factor(330));

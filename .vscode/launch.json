@@ -11,7 +11,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/Lesson02/rps/rps.js",
+      "program": "${workspaceFolder}/Lesson03/Hard01/question_03.js",
       "console": "externalTerminal"
     }
   ]

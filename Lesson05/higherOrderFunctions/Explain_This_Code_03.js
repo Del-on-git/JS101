@@ -3,9 +3,11 @@ let myArr = [[18, 7], [3, 12]].forEach(arr => {
     if (num > 5) {
       return console.log(num);
     }
+    return undefined;
   });
 });
 
+console.log(myArr);
 /*
   The variable myArr is declared an initialized with the value returned from
   a call to the method `forEach` on the outer array of the literal

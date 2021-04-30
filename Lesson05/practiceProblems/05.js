@@ -8,8 +8,8 @@ let munsters = {
   Marilyn: { age: 23, gender: 'female'}
 };
 
-let answer = Object.keys(munsters).filter( (member) => {
-  return munsters[member].gender === 'male';
-}).reduce( (totalAge, member) => totalAge + munsters[member].age, 0);
+let answer = Object.values(munsters)
+  .filter( member => member.gender === 'male' )
+  .reduce( (totAge, member) => totAge + member.age, 0);
 
 console.log(answer);

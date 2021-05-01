@@ -19,7 +19,7 @@ function generateHexChar() {
 
 function generateQuadruple() {
   let sequence = '';
-  for( let idx = 0; idx < 4; idx++ ) {
+  for (let idx = 0; idx < 4; idx++) {
     sequence += generateHexChar();
   }
 

@@ -1,5 +1,10 @@
 {
   "MESSAGES": {
-    "GREET": "Welcome to Tic Tac Toe!"
+    "GREET": "Welcome to Tic Tac Toe!",
+    "REQ_USER_CHOICE": "What square would you like to play? "
+  },
+  "ERROR": {
+    "INVALID_CHOICE": "ERROR: Invalid Choice.",
+    "NON_EMPTY_SQUARE": "ERROR: You can't play there."
   }
 }

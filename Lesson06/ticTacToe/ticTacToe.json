@@ -1,7 +1,11 @@
 {
   "MESSAGES": {
     "GREET": "Welcome to Tic Tac Toe!",
-    "REQ_USER_CHOICE": "What square would you like to play? "
+    "REQ_USER_CHOICE": "What square would you like to play? ",
+    "USER_WINS": "YOU WIN!",
+    "MACHINE_WINS": "You lose :(",
+    "PLAY_AGAIN": "Would you like to play again? (Y/N): ",
+    "GOODBYE": "Goodbye!"
   },
   "ERROR": {
     "INVALID_CHOICE": "ERROR: Invalid Choice.",

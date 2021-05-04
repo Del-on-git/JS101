@@ -21,9 +21,10 @@ const BARS = {
   bottom:""
 };
 const MAX_NUM_PLAYS = 9;
-const WINNING_VERTICAL = ['111', '222', '333'];
+const WINNING_VERTICAL = ['000', '111', '222'];
 const WINNING_HORIZONTAL = ['aaa', 'bbb', 'ccc'];
-const WINNING_DIAGONAL = ['123', 'abc'];
+const WINNING_DIAGONAL_1 = ['a0', 'b1', 'c2'];
+const WINNING_DIAGONAL_2 = ['a2', 'b1', 'c0'];
 const USER_MARKER = "  X  ";
 const MACHINE_MARKER = "  O  ";
 const CHOICES = {
@@ -35,7 +36,7 @@ function displayBoard() {
   let entries = Object.values(SQUARES);
   let separators = Object.values(BARS);
 
-  //console.clear();
+  console.clear();
 
   entries.forEach( (arr, idx) => {
     console.log(arr[0] + '|' + arr[1] + '|' + arr[2]);
@@ -110,14 +111,27 @@ function insertChoice(choice, playerMarker) {
 
 function insertUserChoice(choice) {
   CHOICES.USER.push(choice);
-  console.log(CHOICES.USER);//=======================DEBUGGING
   insertChoice(choice, USER_MARKER);
 }
 
 function insertMachineChoice(choice) {
   CHOICES.MACHINE.push(choice);
-  console.log(CHOICES.MACHINE);//=====================DEBUGGING
   insertChoice(choice, MACHINE_MARKER);
+}
+
+function vertWin(numbers) {
+  return WINNING_VERTICAL.some( str => numbers.includes(str));
+}
+
+function horzWin(letters) {
+  return WINNING_HORIZONTAL.some( str => letters.includes(str));
+}
+
+function diagWin(choices) {
+  let diagOne = choices.filter( arr => WINNING_DIAGONAL_1.includes(arr.join('')));
+  let diagTwo = choices.filter( arr => WINNING_DIAGONAL_2.includes(arr.join('')));
+
+  return diagOne.length === 3 || diagTwo.length === 3;
 }
 
 function isMachineWinner() {
@@ -125,13 +139,9 @@ function isMachineWinner() {
     return false;
   }
 
-  let numbers = CHOICES.MACHINE.flat().sort().slice(0, 3).join('');
-  let letters = CHOICES.MACHINE.flat().sort().slice(3).join('');
-
-  if (WINNING_VERTICAL.includes(numbers)
-  || WINNING_HORIZONTAL.includes(letters)
-  || (WINNING_DIAGONAL.includes(numbers)
-  && WINNING_DIAGONAL.includes(letters))) {
+  let numbers = CHOICES.MACHINE.flat().sort().filter(item => typeof (item) === 'number').join('');
+  let letters = CHOICES.MACHINE.flat().sort().filter(item => typeof (item) === 'string').join('');
+  if (vertWin(numbers) || horzWin(letters) || diagWin(CHOICES.MACHINE)) {
     displayBoard();
     console.log(MESSAGE.MACHINE_WINS);
     return true;
@@ -145,13 +155,9 @@ function isUserWinner() {
     return false;
   }
 
-  let numbers = CHOICES.USER.flat().sort().slice(0, 3).join('');
-  let letters = CHOICES.USER.flat().sort().slice(3).join('');
-
-  if (WINNING_VERTICAL.includes(numbers)
-  || WINNING_HORIZONTAL.includes(letters)
-  || (WINNING_DIAGONAL.includes(numbers)
-  && WINNING_DIAGONAL.includes(letters))) {
+  let numbers = CHOICES.USER.flat().sort().filter(item => typeof (item) === 'number').join('');
+  let letters = CHOICES.USER.flat().sort().filter(item => typeof (item) === 'string').join('');
+  if (vertWin(numbers) || horzWin(letters) || diagWin(CHOICES.USER)) {
     displayBoard();
     console.log(MESSAGE.USER_WINS);
     return true;
@@ -162,6 +168,8 @@ function isUserWinner() {
 
 function isBoardFull() {
   if (CHOICES.USER.length + CHOICES.MACHINE.length === MAX_NUM_PLAYS) {
+    displayBoard();
+    console.log(MESSAGE.TIE);
     return true;
   } else {
     return false;
@@ -170,6 +178,8 @@ function isBoardFull() {
 
 function resetBoard() {
   SQUARES = JSON.parse(JSON.stringify(SQUARES_FOR_RESET));
+  CHOICES.USER = [];
+  CHOICES.MACHINE = [];
 }
 
 function playMatch() {
@@ -179,6 +189,8 @@ function playMatch() {
     let userPlays = getAndValidateUserChoice();
     insertUserChoice(userPlays);
     if (isUserWinner()) {
+      break;
+    } else if (isBoardFull()) {
       break;
     }
 

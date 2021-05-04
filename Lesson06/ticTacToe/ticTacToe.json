@@ -5,6 +5,7 @@
     "USER_WINS": "YOU WIN!",
     "MACHINE_WINS": "You lose :(",
     "PLAY_AGAIN": "Would you like to play again? (Y/N): ",
+    "TIE": "It's a tie!",
     "GOODBYE": "Goodbye!"
   },
   "ERROR": {

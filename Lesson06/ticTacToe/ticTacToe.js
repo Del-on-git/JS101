@@ -1,11 +1,18 @@
 //=====================================DECLARATION AND INITIALIZATION OF GLOBALS
 let readline = require("readline-sync");
-let SQUARES = {
-  a:['  A1 ', '  A2 ', '  A3 '],
-  b:['  B1 ', '  B2 ', '  B3 '],
-  c:['  C1 ', '  C2 ', '  C3 ']
+let GAMESTATE = {
+  SQUARES: {
+    a:['  A1 ', '  A2 ', '  A3 '],
+    b:['  B1 ', '  B2 ', '  B3 '],
+    c:['  C1 ', '  C2 ', '  C3 ']
+  },
+  DEFEND_ATTEMPTS: 0,
+  THREATS: {
+    vertical: [],
+    horizontal: [],
+    diagonal: []
+  }
 };
-let DEFEND_ATTEMPTS = 0;
 
 const MAX_DEFEND_ATTEMPTS = 9;
 const BACKEND = require("./ticTacToe.json");
@@ -44,7 +51,7 @@ const BARS = {
 };
 //=========================================================GAME BOARD MANAGEMENT
 function displayBoard() {
-  let entries = Object.values(SQUARES);
+  let entries = Object.values(GAMESTATE.SQUARES);
   let separators = Object.values(BARS);
 
   //console.clear();
@@ -56,7 +63,7 @@ function displayBoard() {
 }
 
 function squareIsEmpty(square, playerMarker) {
-  let space = SQUARES[square[0]][square[1]];
+  let space = GAMESTATE.SQUARES[square[0]][square[1]];
   if (space === USER_MARKER || space === MACHINE_MARKER) {
     if (playerMarker === USER_MARKER) {
       console.log(ERROR.NON_EMPTY_SQUARE);
@@ -64,13 +71,13 @@ function squareIsEmpty(square, playerMarker) {
 
     return false;
   } else {
-    DEFEND_ATTEMPTS = 0;
+    GAMESTATE.DEFEND_ATTEMPTS = 0;
     return true;
   }
 }
 
 function insertChoice(choice, playerMarker) {
-  SQUARES[choice[0]][choice[1]] = playerMarker;
+  GAMESTATE.SQUARES[choice[0]][choice[1]] = playerMarker;
 }
 
 function insertUserChoice(choice) {
@@ -94,7 +101,7 @@ function isBoardFull() {
 }
 
 function resetBoard() {
-  SQUARES = JSON.parse(JSON.stringify(SQUARES_FOR_RESET));
+  GAMESTATE.SQUARES = JSON.parse(JSON.stringify(SQUARES_FOR_RESET));
   CHOICES.USER = [];
   CHOICES.MACHINE = [];
 }
@@ -144,7 +151,7 @@ function detectVerticalThreat() {
     .join('');
 
   if (VERT_THREATS.some( str => columns.includes(str))) {
-    let threat = VERT_THREATS.filter( str => columns.includes(str))[0][0];
+    let threat = VERT_THREATS.filter(str => columns.includes(str))[0][0];
     return threat;
   }
 
@@ -172,7 +179,7 @@ function detectDiagonalThreat() {
     .some(arr => arr.every(str => diagonals.includes(str)))) {
 
     let threat = Object.values(DIAG_THREATS)
-      .filter(arr => arr.every(str => diagonals.includes(str)));
+      .filter(arr => arr.every(str => diagonals.includes(str)))[0];
 
     return threat;
   }
@@ -183,52 +190,49 @@ function detectDiagonalThreat() {
 function selectHorizontal(threat) {
   let choice = [];
   choice[0] = threat;
-  choice[1] = SQUARES[threat].reduce((result, square, idx) => {
+  choice[1] = GAMESTATE.SQUARES[threat].reduce((result, square, idx) => {
     if (square !== USER_MARKER) {
       result += idx;
     }
     return result;
   }, 0);
-  console.log(`DEFENDING H WITH: ${choice}`);//=================================================DEBUG
   return choice;
 }
 
 function selectVertical(threat) {
   let choice = [];
   choice[1] = Number.parseInt(threat, 10);
-  Object.keys(SQUARES).forEach(row => {
-    if (SQUARES[row][choice[1]] !== USER_MARKER) {
+  Object.keys(GAMESTATE.SQUARES).forEach(row => {
+    if (GAMESTATE.SQUARES[row][choice[1]] !== USER_MARKER) {
       choice[0] = row;
     }
   });
-  console.log(`DEFENDING V WITH: ${choice}`);//=================================================DEBUG
   return choice;
 }
 
 function selectDiagonal(threat) {
-  let choice = [];
-  let alpha = ['a', 'b', 'c']; // FIX THIS! DOESN'T WORK AFTER ONE SELECTION FROM ALL THREE COLUMNS OR ROWS!!!!!
-  let num = ['1', '2', '3'];
+  let choice;
+  console.log(`INSIDE selectDiagonal; threat = ${threat}`);
+  if (threat.every(str => WINNING_DIAGONAL_1.includes(str))) {
+    choice = WINNING_DIAGONAL_1.filter(str => !threat.includes(str));
+    choice = choice[0].split('');
+    choice[1] = Number.parseInt(choice[1], 10);
+  } else if (threat.every(str => WINNING_DIAGONAL_2.includes(str))) {
+    choice = WINNING_DIAGONAL_2.filter(str => !threat.includes(str));
+    choice = choice[0].split('');
+    choice[1] = Number.parseInt(choice[1], 10);
+  }
 
-  choice[0] = alpha.filter(char => !threat.join('').includes(char));
-  choice[1] = num.filter(char => !threat.join('').includes(char));
-  choice[1] = Number.parseInt(choice[1], 10);
-  console.log(`DEFENDING D WITH: ${choice}`);//=================================================DEBUG
   return choice;
 }
 
+function chooseOptimalDefense(threats) {
+  console.log(threats);
+}
+
 function defend() {
-  let threat;
+//TODO: Completely rethink defend strategy; start with detection
 
-  if ((threat = detectVerticalThreat())) {
-    return selectVertical(threat);
-  } else if ((threat = detectHorizontalThreat())) {
-    return selectHorizontal(threat);
-  } else if ((threat = detectDiagonalThreat())) {
-    return selectDiagonal(threat);
-  }
-
-  return threat;
 }
 
 function playRandom() {
@@ -236,7 +240,6 @@ function playRandom() {
   choice.push('abc'[Math.floor(Math.random() * 3)]);
   choice.push([0,1,2][Math.floor(Math.random() * 3)]);
 
-  console.log("Playing Random");//==============================================DEBUG
   return choice;
 }
 
@@ -245,10 +248,10 @@ function generateMachineChoice() {
 
   do {
     choice = defend();
-    DEFEND_ATTEMPTS++;
-    if (!choice || DEFEND_ATTEMPTS >= MAX_DEFEND_ATTEMPTS) {
+    GAMESTATE.DEFEND_ATTEMPTS++;
+    if (!choice || GAMESTATE.DEFEND_ATTEMPTS >= MAX_DEFEND_ATTEMPTS) {
       choice = playRandom();
-      DEFEND_ATTEMPTS = 0;
+      GAMESTATE.DEFEND_ATTEMPTS = 0;
     }
   } while (!squareIsEmpty(choice, MACHINE_MARKER));
 

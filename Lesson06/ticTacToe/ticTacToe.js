@@ -1,60 +1,41 @@
 //=====================================DECLARATION AND INITIALIZATION OF GLOBALS
 let readline = require("readline-sync");
 let GAMESTATE = {
-  SQUARES: {
-    a:['  A1 ', '  A2 ', '  A3 '],
-    b:['  B1 ', '  B2 ', '  B3 '],
-    c:['  C1 ', '  C2 ', '  C3 ']
-  },
-  DEFEND_ATTEMPTS: 0,
-  THREATS: {
-    vertical: [],
-    horizontal: [],
-    diagonal: []
-  }
+  SQUARES: [
+    ['  00 ', '  01 ', '  02 '],
+    ['  10 ', '  11 ', '  12 '],
+    ['  20 ', '  21 ', '  22 ']
+  ]
 };
 
-const MAX_DEFEND_ATTEMPTS = 9;
 const BACKEND = require("./ticTacToe.json");
 const MESSAGE = BACKEND.MESSAGES;
 const ERROR = BACKEND.ERROR;
-const MAX_NUM_PLAYS = 9;
-const USER_MARKER = "  X  ";
-const MACHINE_MARKER = "  O  ";
-const WINNING_VERTICAL = ['000', '111', '222'];
-const WINNING_HORIZONTAL = ['aaa', 'bbb', 'ccc'];
-const WINNING_DIAGONAL_1 = ['a0', 'b1', 'c2'];
-const WINNING_DIAGONAL_2 = ['a2', 'b1', 'c0'];
-const VERT_THREATS = ['00', '11', '22'];
-const HORIZ_THREATS = ['aa', 'bb', 'cc'];
-const DIAG_THREATS = {
-  1:['a0', 'b1'],
-  2:['b1', 'c2'],
-  3:['a0', 'c2'],
-  4:['a2', 'b1'],
-  5:['b1', 'c0'],
-  6:['a2', 'c0']
+const MARKERS = {
+  USER:"  X  ",
+  MACHINE:"  O  "
 };
-const CHOICES = {
-  USER:[],
-  MACHINE:[]
-};
-const SQUARES_FOR_RESET = {
-  a:['  A1 ', '  A2 ', '  A3 '],
-  b:['  B1 ', '  B2 ', '  B3 '],
-  c:['  C1 ', '  C2 ', '  C3 ']
-};
+const DIAGONAL_COORDS = [
+  [[0, 0], [1, 1], [2, 2]],
+  [[2, 0], [1, 1], [0, 2]]
+];
+const SQUARES_FOR_RESET = [
+  ['  00 ', '  01 ', '  02 '],
+  ['  10 ', '  11 ', '  12 '],
+  ['  20 ', '  21 ', '  22 ']
+];
 const BARS = {
   first:"-----|-----|-----",
   second:"-----|-----|-----",
   bottom:""
 };
+
 //=========================================================GAME BOARD MANAGEMENT
 function displayBoard() {
   let entries = Object.values(GAMESTATE.SQUARES);
   let separators = Object.values(BARS);
 
-  //console.clear();
+  console.clear();
 
   entries.forEach( (arr, idx) => {
     console.log(arr[0] + '|' + arr[1] + '|' + arr[2]);
@@ -64,8 +45,8 @@ function displayBoard() {
 
 function squareIsEmpty(square, playerMarker) {
   let space = GAMESTATE.SQUARES[square[0]][square[1]];
-  if (space === USER_MARKER || space === MACHINE_MARKER) {
-    if (playerMarker === USER_MARKER) {
+  if (space === MARKERS.USER || space === MARKERS.MACHINE) {
+    if (playerMarker === MARKERS.USER) {
       console.log(ERROR.NON_EMPTY_SQUARE);
     }
 
@@ -80,21 +61,17 @@ function insertChoice(choice, playerMarker) {
   GAMESTATE.SQUARES[choice[0]][choice[1]] = playerMarker;
 }
 
-function insertUserChoice(choice) {
-  CHOICES.USER.push(choice);
-  insertChoice(choice, USER_MARKER);
-}
-
-function insertMachineChoice(choice) {
-  CHOICES.MACHINE.push(choice);
-  insertChoice(choice, MACHINE_MARKER);
-}
-
 function isBoardFull() {
-  if (CHOICES.USER.length + CHOICES.MACHINE.length === MAX_NUM_PLAYS) {
+  if (GAMESTATE.SQUARES.every( arr => {
+    return arr.every( element => {
+      return element === MARKERS.USER || element === MARKERS.MACHINE;
+    });
+  })
+  ) {
     displayBoard();
     console.log(MESSAGE.TIE);
     return true;
+
   } else {
     return false;
   }
@@ -102,8 +79,6 @@ function isBoardFull() {
 
 function resetBoard() {
   GAMESTATE.SQUARES = JSON.parse(JSON.stringify(SQUARES_FOR_RESET));
-  CHOICES.USER = [];
-  CHOICES.MACHINE = [];
 }
 
 //=======================================================USER POSITION SELECTION
@@ -111,10 +86,7 @@ function isValidChoice(choice) {
   if (choice.length !== 2) {
     console.log(ERROR.INVALID_CHOICE);
     return false;
-  } else if (!'ABCabc'.includes(choice[0])) {
-    console.log(ERROR.INVALID_CHOICE);
-    return false;
-  } else if (!'123'.includes(choice[1])) {
+  } else if (!'012'.includes(choice[0]) || !'012'.includes(choice[1])) {
     console.log(ERROR.INVALID_CHOICE);
     return false;
   } else {
@@ -123,8 +95,8 @@ function isValidChoice(choice) {
 }
 
 function formatUserChoice(choice) {
-  choice[0] = choice[0].toLowerCase();
-  choice[1] = Number.parseInt(choice[1], 10) - 1;
+  choice[0] = Number.parseInt(choice[0], 10);
+  choice[1] = Number.parseInt(choice[1], 10);
   return choice;
 }
 
@@ -136,7 +108,7 @@ function getAndValidateUserChoice() {
 
   choice = formatUserChoice(choice.split(''));
 
-  if (squareIsEmpty(choice, USER_MARKER)) {
+  if (squareIsEmpty(choice, MARKERS.USER)) {
     return choice;
   } else {
     return getAndValidateUserChoice();
@@ -144,92 +116,6 @@ function getAndValidateUserChoice() {
 }
 
 //====================================================MACHINE POSITION SELECTION
-function detectVerticalThreat() {
-
-  let columns = CHOICES.USER.flat()
-    .filter( val => typeof (val) === 'number')
-    .join('');
-
-  if (VERT_THREATS.some( str => columns.includes(str))) {
-    let threat = VERT_THREATS.filter(str => columns.includes(str))[0][0];
-    return threat;
-  }
-
-  return false;
-}
-
-function detectHorizontalThreat() {
-
-  let rows = CHOICES.USER.flat()
-    .filter( val => typeof (val) === 'string')
-    .join('');
-
-  if (HORIZ_THREATS.some(str => rows.includes(str))) {
-    let threat = HORIZ_THREATS.filter(str => rows.includes(str))[0][0];
-    return threat;
-  }
-
-  return false;
-}
-
-function detectDiagonalThreat() {
-  let diagonals = [];
-  CHOICES.USER.forEach(arr => diagonals.push(arr.join('')));
-  if (Object.values(DIAG_THREATS)
-    .some(arr => arr.every(str => diagonals.includes(str)))) {
-
-    let threat = Object.values(DIAG_THREATS)
-      .filter(arr => arr.every(str => diagonals.includes(str)))[0];
-
-    return threat;
-  }
-
-  return false;
-}
-
-function selectHorizontal(threat) {
-  let choice = [];
-  choice[0] = threat;
-  choice[1] = GAMESTATE.SQUARES[threat].reduce((result, square, idx) => {
-    if (square !== USER_MARKER) {
-      result += idx;
-    }
-    return result;
-  }, 0);
-  return choice;
-}
-
-function selectVertical(threat) {
-  let choice = [];
-  choice[1] = Number.parseInt(threat, 10);
-  Object.keys(GAMESTATE.SQUARES).forEach(row => {
-    if (GAMESTATE.SQUARES[row][choice[1]] !== USER_MARKER) {
-      choice[0] = row;
-    }
-  });
-  return choice;
-}
-
-function selectDiagonal(threat) {
-  let choice;
-  console.log(`INSIDE selectDiagonal; threat = ${threat}`);
-  if (threat.every(str => WINNING_DIAGONAL_1.includes(str))) {
-    choice = WINNING_DIAGONAL_1.filter(str => !threat.includes(str));
-    choice = choice[0].split('');
-    choice[1] = Number.parseInt(choice[1], 10);
-  } else if (threat.every(str => WINNING_DIAGONAL_2.includes(str))) {
-    choice = WINNING_DIAGONAL_2.filter(str => !threat.includes(str));
-    choice = choice[0].split('');
-    choice[1] = Number.parseInt(choice[1], 10);
-  }
-
-  return choice;
-}
-
-function chooseOptimalDefense(threats) {
-  console.log(threats);
-}
-
 function defend() {
 //TODO: Completely rethink defend strategy; start with detection
 
@@ -237,8 +123,9 @@ function defend() {
 
 function playRandom() {
   let choice = [];
-  choice.push('abc'[Math.floor(Math.random() * 3)]);
-  choice.push([0,1,2][Math.floor(Math.random() * 3)]);
+  for (let idx = 0; idx < 2; idx++) {
+    choice.push([0,1,2][Math.floor(Math.random() * 3)]);
+  }
 
   return choice;
 }
@@ -247,75 +134,51 @@ function generateMachineChoice() {
   let choice;
 
   do {
-    choice = defend();
-    GAMESTATE.DEFEND_ATTEMPTS++;
-    if (!choice || GAMESTATE.DEFEND_ATTEMPTS >= MAX_DEFEND_ATTEMPTS) {
-      choice = playRandom();
-      GAMESTATE.DEFEND_ATTEMPTS = 0;
-    }
-  } while (!squareIsEmpty(choice, MACHINE_MARKER));
+    choice = playRandom();
+  } while (!squareIsEmpty(choice, MARKERS.MACHINE));
 
   return choice;
 }
 
 //==============================================================DETERMINE WINNER
-function vertWin(numbers) {
-  return WINNING_VERTICAL.some( str => numbers.includes(str));
-}
-
-function horzWin(letters) {
-  return WINNING_HORIZONTAL.some( str => letters.includes(str));
-}
-
-function diagWin(choices) {
-  let diaOne = choices.filter(arr => WINNING_DIAGONAL_1.includes(arr.join('')));
-  let diaTwo = choices.filter(arr => WINNING_DIAGONAL_2.includes(arr.join('')));
-
-  return diaOne.length === 3 || diaTwo.length === 3;
-}
-
-function isMachineWinner() {
-  if (CHOICES.MACHINE.length < 3) {
-    return false;
+function vertWin(playerMarker) {
+  let verticals = [];
+  let arr = [];
+  for (let col = 0; col < GAMESTATE.SQUARES.length; col++) {
+    for (let row = 0; row < GAMESTATE.SQUARES.length; row++) {
+      arr.push(GAMESTATE.SQUARES[row][col]);
+    }
+    verticals.push(arr);
+    arr = [];
   }
 
-  let columns = CHOICES.MACHINE.flat()
-    .sort()
-    .filter(item => typeof (item) === 'number')
-    .join('');
+  return verticals.some( arr => arr.every( entry => entry === playerMarker));
+}
 
-  let rows = CHOICES.MACHINE.flat()
-    .sort()
-    .filter(item => typeof (item) === 'string')
-    .join('');
+function horzWin(playerMarker) {
+  return GAMESTATE.SQUARES.some( arr => {
+    return arr.every( entry => entry === playerMarker);
+  });
+}
 
-  if (vertWin(columns) || horzWin(rows) || diagWin(CHOICES.MACHINE)) {
+function diagWin(playerMarker) {
+  return DIAGONAL_COORDS.some( arr => {
+    return arr.every( entry => {
+      return GAMESTATE.SQUARES[entry[0]][entry[1]] === playerMarker;
+    });
+  });
+}
+
+function isWinner(player) {
+  let marker = MARKERS[player];
+  let tests = [vertWin, horzWin, diagWin];
+  let checks = [];
+
+  tests.forEach( func => checks.push(func(marker)));
+  if (checks.some( bool => bool)) {
+    let winner = (player === "USER" ? "USER_WINS" : "MACHINE_WINS");
     displayBoard();
-    console.log(MESSAGE.MACHINE_WINS);
-    return true;
-  } else {
-    return false;
-  }
-}
-
-function isUserWinner() {
-  if (CHOICES.USER.length < 3) {
-    return false;
-  }
-
-  let columns = CHOICES.USER.flat()
-    .sort()
-    .filter(item => typeof (item) === 'number')
-    .join('');
-
-  let rows = CHOICES.USER.flat()
-    .sort()
-    .filter(item => typeof (item) === 'string')
-    .join('');
-
-  if (vertWin(columns) || horzWin(rows) || diagWin(CHOICES.USER)) {
-    displayBoard();
-    console.log(MESSAGE.USER_WINS);
+    console.log(MESSAGE[winner]);
     return true;
   } else {
     return false;
@@ -328,16 +191,16 @@ function playMatch() {
     displayBoard();
 
     let userPlays = getAndValidateUserChoice();
-    insertUserChoice(userPlays);
-    if (isUserWinner()) {
+    insertChoice(userPlays, MARKERS.USER);
+    if (isWinner("USER")) {
       break;
     } else if (isBoardFull()) {
       break;
     }
 
     let cpuPlays = generateMachineChoice();
-    insertMachineChoice(cpuPlays);
-    if (isMachineWinner()) {
+    insertChoice(cpuPlays, MARKERS.MACHINE);
+    if (isWinner("MACHINE")) {
       break;
     }
   } while (!isBoardFull());

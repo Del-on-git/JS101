@@ -30,12 +30,12 @@ const BARS = {
   bottom:""
 };
 
-//=========================================================GAME BOARD MANAGEMENT
+//=========================================================GAME STATE MANAGEMENT
 function displayBoard() {
   let entries = Object.values(GAMESTATE.SQUARES);
   let separators = Object.values(BARS);
 
-  console.clear();
+  //console.clear();
 
   entries.forEach( (arr, idx) => {
     console.log(arr[0] + '|' + arr[1] + '|' + arr[2]);
@@ -81,6 +81,20 @@ function resetBoard() {
   GAMESTATE.SQUARES = JSON.parse(JSON.stringify(SQUARES_FOR_RESET));
 }
 
+function verticalScan() {
+  let verticals = [];
+  let arr = [];
+  for (let col = 0; col < GAMESTATE.SQUARES.length; col++) {
+    for (let row = 0; row < GAMESTATE.SQUARES.length; row++) {
+      arr.push(GAMESTATE.SQUARES[row][col]);
+    }
+    verticals.push(arr);
+    arr = [];
+  }
+
+  return verticals;
+}
+
 //=======================================================USER POSITION SELECTION
 function isValidChoice(choice) {
   if (choice.length !== 2) {
@@ -116,8 +130,34 @@ function getAndValidateUserChoice() {
 }
 
 //====================================================MACHINE POSITION SELECTION
+function detectVerticalThreats() {
+  let verticals = verticalScan();
+  verticals = verticals.filter( arr => {
+    return (arr.reduce( (num, mark) =>{
+      if (mark === MARKERS.USER) {
+        num++;
+      }
+      return num;
+    }, 0) === 2 && !arr.includes(MARKERS.MACHINE));
+  });
+
+  let threats = [];
+  verticals.forEach( arr => {
+    arr.forEach( element => {
+      if (element !== MARKERS.USER) {
+        threats.push([element.trim()[0], element.trim()[1]]);
+      }
+    });
+  });
+  return threats;
+}
+
 function defend() {
-//TODO: Completely rethink defend strategy; start with detection
+  //scan board vertically looking for unblocked pairs
+  //scan board horizontally looking for unblocked pairs
+  //scan diagonals looking for unblocked pairs
+
+  //decide what to do if more than one unblocked pair exists
 
 }
 
@@ -137,20 +177,14 @@ function generateMachineChoice() {
     choice = playRandom();
   } while (!squareIsEmpty(choice, MARKERS.MACHINE));
 
+  detectVerticalThreats();//====================================TESTING
+
   return choice;
 }
 
 //==============================================================DETERMINE WINNER
 function vertWin(playerMarker) {
-  let verticals = [];
-  let arr = [];
-  for (let col = 0; col < GAMESTATE.SQUARES.length; col++) {
-    for (let row = 0; row < GAMESTATE.SQUARES.length; row++) {
-      arr.push(GAMESTATE.SQUARES[row][col]);
-    }
-    verticals.push(arr);
-    arr = [];
-  }
+  let verticals = verticalScan();
 
   return verticals.some( arr => arr.every( entry => entry === playerMarker));
 }

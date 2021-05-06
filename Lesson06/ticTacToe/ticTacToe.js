@@ -133,7 +133,7 @@ function getAndValidateUserChoice() {
 function detectVerticalThreats() {
   let verticals = verticalScan();
   verticals = verticals.filter( arr => {
-    return (arr.reduce( (num, mark) =>{
+    return (arr.reduce( (num, mark) => {
       if (mark === MARKERS.USER) {
         num++;
       }
@@ -152,9 +152,33 @@ function detectVerticalThreats() {
   return threats;
 }
 
-function defend() {
-  //scan board vertically looking for unblocked pairs
-  //scan board horizontally looking for unblocked pairs
+function detectHorizontalThreats() {
+  let horizontals = GAMESTATE.SQUARES;
+  horizontals = horizontals.filter( arr => {
+    return (arr.reduce( (num, mark) => {
+      if (mark === MARKERS.USER) {
+        num++;
+      }
+      return num;
+    }, 0) === 2 && !arr.includes(MARKERS.MACHINE));
+  });
+
+  let threats = [];
+  horizontals.forEach( arr => {
+    arr.forEach( element => {
+      if (element !== MARKERS.USER) {
+        threats.push(element.trim()[0], element.trim()[1]);
+      }
+    });
+  });
+  return threats;
+}
+
+function detectThreats() {
+  threats = {
+    vertical: detectVerticalThreats(),
+    horizontal: detectHorizontalThreats()
+  };
   //scan diagonals looking for unblocked pairs
 
   //decide what to do if more than one unblocked pair exists
@@ -177,8 +201,7 @@ function generateMachineChoice() {
     choice = playRandom();
   } while (!squareIsEmpty(choice, MARKERS.MACHINE));
 
-  detectVerticalThreats();//====================================TESTING
-
+  detectThreats() //========================TESTING
   return choice;
 }
 

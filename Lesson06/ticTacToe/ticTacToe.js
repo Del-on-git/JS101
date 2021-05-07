@@ -108,7 +108,7 @@ function isValidChoice(choice) {
   }
 }
 
-function formatUserChoice(choice) {
+function formatCoordinates(choice) {
   choice[0] = Number.parseInt(choice[0], 10);
   choice[1] = Number.parseInt(choice[1], 10);
   return choice;
@@ -120,7 +120,7 @@ function getAndValidateUserChoice() {
     choice = readline.question(MESSAGE.REQ_USER_CHOICE);
   } while (!isValidChoice(choice));
 
-  choice = formatUserChoice(choice.split(''));
+  choice = formatCoordinates(choice.split(''));
 
   if (squareIsEmpty(choice, MARKERS.USER)) {
     return choice;
@@ -130,9 +130,8 @@ function getAndValidateUserChoice() {
 }
 
 //====================================================MACHINE POSITION SELECTION
-function detectVerticalThreats() {
-  let verticals = verticalScan();
-  verticals = verticals.filter( arr => {
+function identifyUnblockedPairs(candidates) {
+  return candidates.filter( arr => {
     return (arr.reduce( (num, mark) => {
       if (mark === MARKERS.USER) {
         num++;
@@ -140,46 +139,60 @@ function detectVerticalThreats() {
       return num;
     }, 0) === 2 && !arr.includes(MARKERS.MACHINE));
   });
+}
 
-  let threats = [];
-  verticals.forEach( arr => {
+function identifyBlockingPosition(candidates) {
+  let position = [];
+  candidates.forEach( arr => {
     arr.forEach( element => {
       if (element !== MARKERS.USER) {
-        threats.push([element.trim()[0], element.trim()[1]]);
+        position.push([element.trim()[0], element.trim()[1]]);
       }
     });
   });
-  return threats;
+
+  position.forEach( (arr) => {
+    arr.forEach( (element, idx) => {
+      arr[idx] = Number.parseInt(element, 10);
+    });
+  });
+
+  return position;
+}
+
+function detectVerticalThreats() {
+  let verticals = verticalScan();
+  verticals = identifyUnblockedPairs(verticals);
+
+  return identifyBlockingPosition(verticals);
 }
 
 function detectHorizontalThreats() {
   let horizontals = GAMESTATE.SQUARES;
-  horizontals = horizontals.filter( arr => {
-    return (arr.reduce( (num, mark) => {
-      if (mark === MARKERS.USER) {
-        num++;
-      }
-      return num;
-    }, 0) === 2 && !arr.includes(MARKERS.MACHINE));
-  });
+  horizontals = identifyUnblockedPairs(horizontals);
 
-  let threats = [];
-  horizontals.forEach( arr => {
-    arr.forEach( element => {
-      if (element !== MARKERS.USER) {
-        threats.push(element.trim()[0], element.trim()[1]);
-      }
-    });
-  });
-  return threats;
+  return identifyBlockingPosition(horizontals);
+}
+
+function detectDiagonalThreats() {
+  let diagonals = [];
+  diagonals.push(DIAGONAL_COORDS[0].map(arr => {
+    return GAMESTATE.SQUARES[arr[0]][arr[1]];
+  }));
+  diagonals.push(DIAGONAL_COORDS[1].map(arr => {
+    return GAMESTATE.SQUARES[arr[0]][arr[1]];
+  }));
+  diagonals = identifyUnblockedPairs(diagonals);
+
+  return identifyBlockingPosition(diagonals);
 }
 
 function detectThreats() {
   threats = {
     vertical: detectVerticalThreats(),
-    horizontal: detectHorizontalThreats()
+    horizontal: detectHorizontalThreats(),
+    diagonal: detectDiagonalThreats()
   };
-  //scan diagonals looking for unblocked pairs
 
   //decide what to do if more than one unblocked pair exists
 
@@ -201,7 +214,7 @@ function generateMachineChoice() {
     choice = playRandom();
   } while (!squareIsEmpty(choice, MARKERS.MACHINE));
 
-  detectThreats() //========================TESTING
+  detectThreats(); //========================TESTING
   return choice;
 }
 

@@ -129,7 +129,8 @@ function getAndValidateUserChoice() {
   }
 }
 
-//====================================================MACHINE POSITION SELECTION
+//==============================================================MACHINE STRATEGY
+//***********************************************DEFENSIVE PLAY*****************
 function identifyUnblockedPairs(candidates) {
   return candidates.filter( arr => {
     return (arr.reduce( (num, mark) => {
@@ -212,7 +213,6 @@ function detectThreats() {
 function redundantThreat(threats) {
   let duplicates = [];
   let candidates = Object.values(threats).map( arr => {
-    console.log(`STRINGIFYING: ${arr}`);
     return JSON.stringify(arr);
   });
 
@@ -228,7 +228,9 @@ function redundantThreat(threats) {
 
 function selectThreat(threats) {
   let threat;
-  let candidates = Object.values(threats).flat().filter( itm => typeof (itm) !== 'boolean');
+  let candidates = Object.values(threats).flat().filter( itm => {
+    return typeof (itm) !== 'boolean';
+  });
 
   if (candidates.length === 1) {
     threat = candidates[0];
@@ -241,6 +243,7 @@ function selectThreat(threats) {
   }
 }
 
+//*************************************STRATEGY OF LAST RESORT******************
 function playRandom() {
   let choice = [];
   for (let idx = 0; idx < 2; idx++) {
@@ -250,6 +253,7 @@ function playRandom() {
   return choice;
 }
 
+//**********************************************BEGIN STRATEGY******************
 function generateMachineChoice() {
   let threats = detectThreats();
   let choice;

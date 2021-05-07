@@ -187,15 +187,58 @@ function detectDiagonalThreats() {
   return identifyBlockingPosition(diagonals);
 }
 
+function doThreatsExist(potentialThreats) {
+  return Object.values(potentialThreats).some( arr => {
+    if (arr !== null) {
+      return arr.length > 0;
+    }
+    return false;
+  });
+}
+
 function detectThreats() {
-  threats = {
+  let threats = {
     vertical: detectVerticalThreats(),
     horizontal: detectHorizontalThreats(),
-    diagonal: detectDiagonalThreats()
+    diagonal: detectDiagonalThreats(),
+    exist: null
   };
 
-  //decide what to do if more than one unblocked pair exists
+  threats.exist = doThreatsExist(threats);
 
+  return threats;
+}
+
+function redundantThreat(threats) {
+  let duplicates = [];
+  let candidates = Object.values(threats).map( arr => {
+    console.log(`STRINGIFYING: ${arr}`);
+    return JSON.stringify(arr);
+  });
+
+  while (candidates.length > 0) {
+    let element = candidates.pop();
+    if (candidates.includes(element) && !duplicates.includes(element)) {
+      duplicates.push(element);
+    }
+  }
+
+  return duplicates[0];
+}
+
+function selectThreat(threats) {
+  let threat;
+  let candidates = Object.values(threats).flat().filter( itm => typeof (itm) !== 'boolean');
+
+  if (candidates.length === 1) {
+    threat = candidates[0];
+    return threat;
+  } else if ((threat = redundantThreat(candidates))) {
+    return threat;
+  } else {
+    threat = candidates[Math.floor(Math.random() * (candidates.length - 1))];
+    return threat;
+  }
 }
 
 function playRandom() {
@@ -208,13 +251,16 @@ function playRandom() {
 }
 
 function generateMachineChoice() {
+  let threats = detectThreats();
   let choice;
+  if (threats.exist) {
+    choice = selectThreat(threats);
+  } else {
+    do {
+      choice = playRandom();
+    } while (!squareIsEmpty(choice, MARKERS.MACHINE));
+  }
 
-  do {
-    choice = playRandom();
-  } while (!squareIsEmpty(choice, MARKERS.MACHINE));
-
-  detectThreats(); //========================TESTING
   return choice;
 }
 

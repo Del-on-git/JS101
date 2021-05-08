@@ -130,15 +130,47 @@ function getAndValidateUserChoice() {
 }
 
 //==============================================================MACHINE STRATEGY
+//Insert generalized unblocked pairs
+//***********************************************OFFENSIVE PLAY*****************
+/*
+function identifyOffensivePosition() {
+
+}
+
+function detectVerticalOpportunities() {
+
+}
+
+function detectHorizontalOpportunities() {
+
+}
+
+function detectDiagonalOpportunities() {
+
+}
+
+function detectOpportunities() {
+  let opportunities = {
+    vertical: detectVerticalOpportunities(),
+    horizontal: detectHorizontalOpportunities(),
+    diagonal: detectDiagonalOpportunities(),
+    exists: null
+  };
+
+  opportunities.exist = doOpportunitiesExist(opportunities);
+
+  return opportunities;
+}
+*/
 //***********************************************DEFENSIVE PLAY*****************
-function identifyUnblockedPairs(candidates) {
+function identifyUnblockedPairs(candidates, interestMarker, avoidMarker) {
   return candidates.filter( arr => {
     return (arr.reduce( (num, mark) => {
-      if (mark === MARKERS.USER) {
+      if (mark === interestMarker) {
         num++;
       }
       return num;
-    }, 0) === 2 && !arr.includes(MARKERS.MACHINE));
+    }, 0) === 2 && !arr.includes(avoidMarker));
   });
 }
 
@@ -163,16 +195,16 @@ function identifyBlockingPosition(candidates) {
 
 function detectVerticalThreats() {
   let verticals = verticalScan();
-  verticals = identifyUnblockedPairs(verticals);
+  verticals = identifyUnblockedPairs(verticals, MARKERS.USER, MARKERS.MACHINE); //TODO Start rewriting unblockedPairs here; generalize
 
   return identifyBlockingPosition(verticals);
 }
 
 function detectHorizontalThreats() {
-  let horizontals = GAMESTATE.SQUARES;
-  horizontals = identifyUnblockedPairs(horizontals);
+  let horiz = GAMESTATE.SQUARES;
+  horiz = identifyUnblockedPairs(horiz, MARKERS.USER, MARKERS.MACHINE);
 
-  return identifyBlockingPosition(horizontals);
+  return identifyBlockingPosition(horiz);
 }
 
 function detectDiagonalThreats() {
@@ -183,7 +215,7 @@ function detectDiagonalThreats() {
   diagonals.push(DIAGONAL_COORDS[1].map(arr => {
     return GAMESTATE.SQUARES[arr[0]][arr[1]];
   }));
-  diagonals = identifyUnblockedPairs(diagonals);
+  diagonals = identifyUnblockedPairs(diagonals, MARKERS.USER, MARKERS.MACHINE);
 
   return identifyBlockingPosition(diagonals);
 }
@@ -255,6 +287,7 @@ function playRandom() {
 
 //**********************************************BEGIN STRATEGY******************
 function generateMachineChoice() {
+  //let opportunities = detectOpportunities(); //TODO: Write offensive strategy
   let threats = detectThreats();
   let choice;
   if (threats.exist) {

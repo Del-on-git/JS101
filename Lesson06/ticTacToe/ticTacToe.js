@@ -211,18 +211,35 @@ function redundantPositions(crises) {
 
   return duplicates[0];
 }
-//***********************************************OFFENSIVE PLAY*****************
-/*
-function detectVerticalOpportunities() {
 
+function selectCrisis(crisis) {
+  let threat;
+  let candidates = Object.values(crisis).flat().filter( itm => {
+    return typeof (itm) !== 'boolean';
+  });
+
+  if (candidates.length === 1) {
+    threat = candidates[0];
+    return threat;
+  } else if ((threat = redundantPositions(candidates))) {
+    return threat;
+  } else {
+    threat = candidates[Math.floor(Math.random() * (candidates.length - 1))];
+    return threat;
+  }
+}
+
+//***********************************************OFFENSIVE PLAY*****************
+function detectVerticalOpportunities() {
+  return detectVerticals(MARKERS.MACHINE, MARKERS.USER);
 }
 
 function detectHorizontalOpportunities() {
-
+  return detectHorizontals(MARKERS.MACHINE, MARKERS.USER);
 }
 
 function detectDiagonalOpportunities() {
-
+  return detectDiagonals(MARKERS.MACHINE, MARKERS.USER);
 }
 
 function detectOpportunities() {
@@ -230,16 +247,15 @@ function detectOpportunities() {
     vertical: detectVerticalOpportunities(),
     horizontal: detectHorizontalOpportunities(),
     diagonal: detectDiagonalOpportunities(),
-    exists: null
+    exist: null
   };
 
-  opportunities.exist = doOpportunitiesExist(opportunities);
+  opportunities.exist = doesCrisisExist(opportunities);
 
   return opportunities;
 }
-*/
-//***********************************************DEFENSIVE PLAY*****************
 
+//***********************************************DEFENSIVE PLAY*****************
 function detectVerticalThreats() {
   return detectVerticals(MARKERS.USER, MARKERS.MACHINE);
 }
@@ -265,23 +281,6 @@ function detectThreats() {
   return threats;
 }
 
-function selectThreat(threats) {
-  let threat;
-  let candidates = Object.values(threats).flat().filter( itm => {
-    return typeof (itm) !== 'boolean';
-  });
-
-  if (candidates.length === 1) {
-    threat = candidates[0];
-    return threat;
-  } else if ((threat = redundantPositions(candidates))) {
-    return threat;
-  } else {
-    threat = candidates[Math.floor(Math.random() * (candidates.length - 1))];
-    return threat;
-  }
-}
-
 //*************************************STRATEGY OF LAST RESORT******************
 function playRandom() {
   let choice = [];
@@ -292,13 +291,15 @@ function playRandom() {
   return choice;
 }
 
-//**********************************************BEGIN STRATEGY******************
+//********************************************EXECUTE STRATEGY******************
 function generateMachineChoice() {
-  //let opportunities = detectOpportunities(); //TODO: Write offensive strategy
+  let opportunities = detectOpportunities();
   let threats = detectThreats();
   let choice;
-  if (threats.exist) {
-    choice = selectThreat(threats);
+  if (opportunities.exist) {
+    choice = selectCrisis(opportunities);
+  } else if (threats.exist) {
+    choice = selectCrisis(threats);
   } else {
     do {
       choice = playRandom();

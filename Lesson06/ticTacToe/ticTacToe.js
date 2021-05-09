@@ -186,6 +186,31 @@ function detectDiagonals(targetMarker, opposingMarker) {
 
   return identifyThirdPosition(diagonals, targetMarker);
 }
+
+function doesCrisisExist(candidates) {
+  return Object.values(candidates).some( arr => {
+    if (arr !== null) {
+      return arr.length > 0;
+    }
+    return false;
+  });
+}
+
+function redundantPositions(crises) {
+  let duplicates = [];
+  let candidates = Object.values(crises).map( arr => {
+    return JSON.stringify(arr);
+  });
+
+  while (candidates.length > 0) {
+    let element = candidates.pop();
+    if (candidates.includes(element) && !duplicates.includes(element)) {
+      duplicates.push(element);
+    }
+  }
+
+  return duplicates[0];
+}
 //***********************************************OFFENSIVE PLAY*****************
 /*
 function detectVerticalOpportunities() {
@@ -227,15 +252,6 @@ function detectDiagonalThreats() {
   return detectDiagonals(MARKERS.USER, MARKERS.MACHINE);
 }
 
-function doThreatsExist(potentialThreats) {
-  return Object.values(potentialThreats).some( arr => {
-    if (arr !== null) {
-      return arr.length > 0;
-    }
-    return false;
-  });
-}
-
 function detectThreats() {
   let threats = {
     vertical: detectVerticalThreats(),
@@ -244,25 +260,9 @@ function detectThreats() {
     exist: null
   };
 
-  threats.exist = doThreatsExist(threats);
+  threats.exist = doesCrisisExist(threats);
 
   return threats;
-}
-
-function redundantThreat(threats) {
-  let duplicates = [];
-  let candidates = Object.values(threats).map( arr => {
-    return JSON.stringify(arr);
-  });
-
-  while (candidates.length > 0) {
-    let element = candidates.pop();
-    if (candidates.includes(element) && !duplicates.includes(element)) {
-      duplicates.push(element);
-    }
-  }
-
-  return duplicates[0];
 }
 
 function selectThreat(threats) {
@@ -274,7 +274,7 @@ function selectThreat(threats) {
   if (candidates.length === 1) {
     threat = candidates[0];
     return threat;
-  } else if ((threat = redundantThreat(candidates))) {
+  } else if ((threat = redundantPositions(candidates))) {
     return threat;
   } else {
     threat = candidates[Math.floor(Math.random() * (candidates.length - 1))];

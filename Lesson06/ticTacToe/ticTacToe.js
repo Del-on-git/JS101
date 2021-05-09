@@ -130,13 +130,64 @@ function getAndValidateUserChoice() {
 }
 
 //==============================================================MACHINE STRATEGY
-//Insert generalized unblocked pairs
-//***********************************************OFFENSIVE PLAY*****************
-/*
-function identifyOffensivePosition() {
-
+function identifyUnblockedPairs(candidates, targetMarker, opposingMarker) {
+  return candidates.filter( arr => {
+    return (arr.reduce( (num, mark) => {
+      if (mark === targetMarker) {
+        num++;
+      }
+      return num;
+    }, 0) === 2 && !arr.includes(opposingMarker));
+  });
 }
 
+function identifyThirdPosition(candidates, targetMarker) {
+  let position = [];
+  candidates.forEach( arr => {
+    arr.forEach( element => {
+      if (element !== targetMarker) {
+        position.push([element.trim()[0], element.trim()[1]]);
+      }
+    });
+  });
+
+  position.forEach( (arr) => {
+    arr.forEach( (element, idx) => {
+      arr[idx] = Number.parseInt(element, 10);
+    });
+  });
+
+  return position;
+}
+
+function detectVerticals(targetMarker, opposingMarker) {
+  let verticals = verticalScan();
+  verticals = identifyUnblockedPairs(verticals, targetMarker, opposingMarker);
+
+  return identifyThirdPosition(verticals, targetMarker);
+}
+
+function detectHorizontals(targetMarker, opposingMarker) {
+  let horiz = GAMESTATE.SQUARES;
+  horiz = identifyUnblockedPairs(horiz, targetMarker, opposingMarker);
+
+  return identifyThirdPosition(horiz, targetMarker);
+}
+
+function detectDiagonals(targetMarker, opposingMarker) {
+  let diagonals = [];
+  diagonals.push(DIAGONAL_COORDS[0].map(arr => {
+    return GAMESTATE.SQUARES[arr[0]][arr[1]];
+  }));
+  diagonals.push(DIAGONAL_COORDS[1].map(arr => {
+    return GAMESTATE.SQUARES[arr[0]][arr[1]];
+  }));
+  diagonals = identifyUnblockedPairs(diagonals, targetMarker, opposingMarker);
+
+  return identifyThirdPosition(diagonals, targetMarker);
+}
+//***********************************************OFFENSIVE PLAY*****************
+/*
 function detectVerticalOpportunities() {
 
 }
@@ -163,61 +214,17 @@ function detectOpportunities() {
 }
 */
 //***********************************************DEFENSIVE PLAY*****************
-function identifyUnblockedPairs(candidates, interestMarker, avoidMarker) {
-  return candidates.filter( arr => {
-    return (arr.reduce( (num, mark) => {
-      if (mark === interestMarker) {
-        num++;
-      }
-      return num;
-    }, 0) === 2 && !arr.includes(avoidMarker));
-  });
-}
-
-function identifyBlockingPosition(candidates) {
-  let position = [];
-  candidates.forEach( arr => {
-    arr.forEach( element => {
-      if (element !== MARKERS.USER) {
-        position.push([element.trim()[0], element.trim()[1]]);
-      }
-    });
-  });
-
-  position.forEach( (arr) => {
-    arr.forEach( (element, idx) => {
-      arr[idx] = Number.parseInt(element, 10);
-    });
-  });
-
-  return position;
-}
 
 function detectVerticalThreats() {
-  let verticals = verticalScan();
-  verticals = identifyUnblockedPairs(verticals, MARKERS.USER, MARKERS.MACHINE); //TODO Start rewriting unblockedPairs here; generalize
-
-  return identifyBlockingPosition(verticals);
+  return detectVerticals(MARKERS.USER, MARKERS.MACHINE);
 }
 
 function detectHorizontalThreats() {
-  let horiz = GAMESTATE.SQUARES;
-  horiz = identifyUnblockedPairs(horiz, MARKERS.USER, MARKERS.MACHINE);
-
-  return identifyBlockingPosition(horiz);
+  return detectHorizontals(MARKERS.USER, MARKERS.MACHINE);
 }
 
 function detectDiagonalThreats() {
-  let diagonals = [];
-  diagonals.push(DIAGONAL_COORDS[0].map(arr => {
-    return GAMESTATE.SQUARES[arr[0]][arr[1]];
-  }));
-  diagonals.push(DIAGONAL_COORDS[1].map(arr => {
-    return GAMESTATE.SQUARES[arr[0]][arr[1]];
-  }));
-  diagonals = identifyUnblockedPairs(diagonals, MARKERS.USER, MARKERS.MACHINE);
-
-  return identifyBlockingPosition(diagonals);
+  return detectDiagonals(MARKERS.USER, MARKERS.MACHINE);
 }
 
 function doThreatsExist(potentialThreats) {

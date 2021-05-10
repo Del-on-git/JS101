@@ -5,7 +5,8 @@ let GAMESTATE = {
     ['  00 ', '  01 ', '  02 '],
     ['  10 ', '  11 ', '  12 '],
     ['  20 ', '  21 ', '  22 ']
-  ]
+  ],
+  PREF_SQUARES: [[1, 1], [0, 0], [0, 2], [2, 2], [2, 0]]
 };
 
 const BACKEND = require("./ticTacToe.json");
@@ -16,14 +17,15 @@ const MARKERS = {
   MACHINE:"  O  "
 };
 const DIAGONAL_COORDS = [
-  [[0, 0], [1, 1], [2, 2]],
-  [[2, 0], [1, 1], [0, 2]]
+  [[1, 1], [0, 0], [2, 2]],
+  [[2, 0], [0, 2], [1, 1]]
 ];
 const SQUARES_FOR_RESET = [
   ['  00 ', '  01 ', '  02 '],
   ['  10 ', '  11 ', '  12 '],
   ['  20 ', '  21 ', '  22 ']
 ];
+const PREF_SQUARES_RESET = [[1, 1], [0, 0], [0, 2], [2, 2], [2, 0]];
 const BARS = {
   first:"-----|-----|-----",
   second:"-----|-----|-----",
@@ -52,7 +54,6 @@ function squareIsEmpty(square, playerMarker) {
 
     return false;
   } else {
-    GAMESTATE.DEFEND_ATTEMPTS = 0;
     return true;
   }
 }
@@ -79,6 +80,7 @@ function isBoardFull() {
 
 function resetBoard() {
   GAMESTATE.SQUARES = JSON.parse(JSON.stringify(SQUARES_FOR_RESET));
+  GAMESTATE.PREF_SQUARES = JSON.parse(JSON.stringify(PREF_SQUARES_RESET));
 }
 
 function verticalScan() {
@@ -281,6 +283,17 @@ function detectThreats() {
   return threats;
 }
 
+function detectPreferentialSquares() {
+  let plays = {
+    options: GAMESTATE.PREF_SQUARES.filter( arr => squareIsEmpty(arr,)),
+    exist: null
+  };
+
+  plays.exist = (plays.options.length > 0);
+
+  return plays;
+}
+
 //*************************************STRATEGY OF LAST RESORT******************
 function playRandom() {
   let choice = [];
@@ -295,11 +308,15 @@ function playRandom() {
 function generateMachineChoice() {
   let opportunities = detectOpportunities();
   let threats = detectThreats();
+  let preferentialPlay = detectPreferentialSquares();
   let choice;
   if (opportunities.exist) {
     choice = selectCrisis(opportunities);
   } else if (threats.exist) {
     choice = selectCrisis(threats);
+  } else if (preferentialPlay.exist) {
+    console.log(preferentialPlay);
+    choice = preferentialPlay.options[0];
   } else {
     do {
       choice = playRandom();

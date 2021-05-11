@@ -6,12 +6,17 @@ let GAMESTATE = {
     ['  10 ', '  11 ', '  12 '],
     ['  20 ', '  21 ', '  22 ']
   ],
-  PREF_SQUARES: [[1, 1], [0, 0], [0, 2], [2, 2], [2, 0]]
+  SCORE: {
+    USER: 0,
+    MACHINE: 0
+  }
 };
 
 const BACKEND = require("./ticTacToe.json");
 const MESSAGE = BACKEND.MESSAGES;
 const ERROR = BACKEND.ERROR;
+const WINNING_MATCH_SCORE = 5;
+const PREF_SQUARES = [[1, 1], [0, 0], [0, 2], [2, 2], [2, 0]];
 const MARKERS = {
   USER:"  X  ",
   MACHINE:"  O  "
@@ -25,7 +30,6 @@ const SQUARES_FOR_RESET = [
   ['  10 ', '  11 ', '  12 '],
   ['  20 ', '  21 ', '  22 ']
 ];
-const PREF_SQUARES_RESET = [[1, 1], [0, 0], [0, 2], [2, 2], [2, 0]];
 const BARS = {
   first:"-----|-----|-----",
   second:"-----|-----|-----",
@@ -33,11 +37,16 @@ const BARS = {
 };
 
 //=========================================================GAME STATE MANAGEMENT
+function displayScores() {
+  console.log(`Human: ${GAMESTATE.SCORE.USER}, Terminator: ${GAMESTATE.SCORE.MACHINE}`);
+}
+
 function displayBoard() {
+  console.clear();
+  displayScores();
+
   let entries = Object.values(GAMESTATE.SQUARES);
   let separators = Object.values(BARS);
-
-  //console.clear();
 
   entries.forEach( (arr, idx) => {
     console.log(arr[0] + '|' + arr[1] + '|' + arr[2]);
@@ -60,6 +69,7 @@ function squareIsEmpty(square, playerMarker) {
 
 function insertChoice(choice, playerMarker) {
   GAMESTATE.SQUARES[choice[0]][choice[1]] = playerMarker;
+  displayBoard();
 }
 
 function isBoardFull() {
@@ -71,6 +81,7 @@ function isBoardFull() {
   ) {
     displayBoard();
     console.log(MESSAGE.TIE);
+    resetBoard();
     return true;
 
   } else {
@@ -80,7 +91,11 @@ function isBoardFull() {
 
 function resetBoard() {
   GAMESTATE.SQUARES = JSON.parse(JSON.stringify(SQUARES_FOR_RESET));
-  GAMESTATE.PREF_SQUARES = JSON.parse(JSON.stringify(PREF_SQUARES_RESET));
+}
+
+function resetScores() {
+  GAMESTATE.SCORE.USER = 0;
+  GAMESTATE.SCORE.MACHINE = 0;
 }
 
 function verticalScan() {
@@ -132,6 +147,7 @@ function getAndValidateUserChoice() {
 }
 
 //==============================================================MACHINE STRATEGY
+//*********************************************STRATEGY BACKEND*****************
 function identifyUnblockedPairs(candidates, targetMarker, opposingMarker) {
   return candidates.filter( arr => {
     return (arr.reduce( (num, mark) => {
@@ -285,13 +301,35 @@ function detectThreats() {
 
 function detectPreferentialSquares() {
   let plays = {
-    options: GAMESTATE.PREF_SQUARES.filter( arr => squareIsEmpty(arr,)),
-    exist: null
+    options: PREF_SQUARES.filter( arr => squareIsEmpty(arr,)),
+    exist: null,
+    centerFree: null
   };
 
   plays.exist = (plays.options.length > 0);
+  plays.centerFree = (plays.exist && plays.options[0].join('') === '11');
 
   return plays;
+}
+
+function chooseCorner(corners) {
+  let cn1 = PREF_SQUARES[1];
+  let cn2 = PREF_SQUARES[2];
+  let cn3 = PREF_SQUARES[3];
+  let cn4 = PREF_SQUARES[4];
+  if (GAMESTATE.SQUARES[cn1[0]][cn1[1]] === MARKERS.USER
+    && squareIsEmpty(cn3)) {
+    return cn3;
+  } else if (GAMESTATE.SQUARES[cn3[0]][cn3[1]] === MARKERS.USER
+    && squareIsEmpty(cn1)) {
+    return cn1;
+  } else if (GAMESTATE.SQUARES[cn2[0]][cn2[1]] === MARKERS.USER
+    && squareIsEmpty(cn4)) {
+    return cn4;
+  } else if (GAMESTATE.SQUARES[cn4[0]][cn4[1]] === MARKERS.USER
+    && squareIsEmpty(cn2)) {
+    return cn2;
+  } else { return corners[Math.floor(Math.random() * corners.length)] }
 }
 
 //*************************************STRATEGY OF LAST RESORT******************
@@ -308,21 +346,21 @@ function playRandom() {
 function generateMachineChoice() {
   let opportunities = detectOpportunities();
   let threats = detectThreats();
-  let preferentialPlay = detectPreferentialSquares();
+  let pref = detectPreferentialSquares();
   let choice;
-  if (opportunities.exist) {
-    choice = selectCrisis(opportunities);
-  } else if (threats.exist) {
-    choice = selectCrisis(threats);
-  } else if (preferentialPlay.exist) {
-    console.log(preferentialPlay);
-    choice = preferentialPlay.options[0];
+  if (opportunities.exist) choice = selectCrisis(opportunities);
+  else if (threats.exist) choice = selectCrisis(threats);
+  else if (pref.exist) {
+    if (pref.centerFree) {
+      choice = pref.options[0];
+    } else {
+      choice = chooseCorner(pref.options);
+    }
   } else {
     do {
       choice = playRandom();
     } while (!squareIsEmpty(choice, MARKERS.MACHINE));
   }
-
   return choice;
 }
 
@@ -357,6 +395,18 @@ function isWinner(player) {
     let winner = (player === "USER" ? "USER_WINS" : "MACHINE_WINS");
     displayBoard();
     console.log(MESSAGE[winner]);
+    GAMESTATE.SCORE[player]++;
+    resetBoard();
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function playerWonMatch() {
+  if (GAMESTATE.SCORE.USER === WINNING_MATCH_SCORE
+    || GAMESTATE.SCORE.MACHINE === WINNING_MATCH_SCORE) {
+    resetScores();
     return true;
   } else {
     return false;
@@ -364,26 +414,6 @@ function isWinner(player) {
 }
 
 //======================================================================GAMEPLAY
-function playMatch() {
-  do {
-    displayBoard();
-
-    let userPlays = getAndValidateUserChoice();
-    insertChoice(userPlays, MARKERS.USER);
-    if (isWinner("USER")) {
-      break;
-    } else if (isBoardFull()) {
-      break;
-    }
-
-    let cpuPlays = generateMachineChoice();
-    insertChoice(cpuPlays, MARKERS.MACHINE);
-    if (isWinner("MACHINE")) {
-      break;
-    }
-  } while (!isBoardFull());
-}
-
 function playAgain() {
   let response = readline.question(MESSAGE.PLAY_AGAIN);
   switch (response.toUpperCase()) {
@@ -399,11 +429,60 @@ function playAgain() {
   }
 }
 
-function play() {
+function userTurn() {
+  let userPlays = getAndValidateUserChoice();
+  insertChoice(userPlays, MARKERS.USER);
+  if (isWinner("USER") || isBoardFull()) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function machineTurn() {
+  let cpuPlays = generateMachineChoice();
+  insertChoice(cpuPlays, MARKERS.MACHINE);
+  if (isWinner("MACHINE") || isBoardFull()) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function determinePlayOrder() {
+  let coinFlip = Math.floor(Math.random() * 10) % 2;
+  if (coinFlip) {
+    console.log("User Plays First");
+    return userTurn;
+  } else {
+    console.log("Machine Plays First");
+    return machineTurn;
+  }
+}
+
+function playRound() {
+  let firstPlayer = determinePlayOrder();
+  let secondPlayer;
+  if (firstPlayer === userTurn) {
+    secondPlayer = machineTurn;
+  } else {
+    secondPlayer = userTurn;
+  }
+
   do {
+    displayBoard();
+  } while (!firstPlayer() && !secondPlayer());
+}
+
+function playMatch() {
+  do {
+    playRound();
+  } while (!playerWonMatch());
+
+  if (playAgain()) {
     playMatch();
-  } while (playAgain());
+  }
 }
 
 //=================================================================START PROGRAM
-play();
+playMatch();

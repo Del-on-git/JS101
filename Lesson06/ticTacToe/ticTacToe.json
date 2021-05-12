@@ -1,6 +1,8 @@
 {
   "MESSAGES": {
     "GREET": "Welcome to Tic Tac Toe!",
+    "USER_FIRST": "User Plays First",
+    "MACHINE_FIRST": "Machine Plays First",
     "REQ_USER_CHOICE": "What square would you like to play? ",
     "USER_WINS": "YOU WIN!",
     "MACHINE_WINS": "You lose :(",

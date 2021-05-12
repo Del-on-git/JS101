@@ -42,7 +42,6 @@ function displayScores() {
 }
 
 function displayBoard() {
-  console.clear();
   displayScores();
 
   let entries = Object.values(GAMESTATE.SQUARES);
@@ -126,6 +125,7 @@ function isValidChoice(choice) {
 }
 
 function formatCoordinates(choice) {
+  choice = choice.split('');
   choice[0] = Number.parseInt(choice[0], 10);
   choice[1] = Number.parseInt(choice[1], 10);
   return choice;
@@ -137,7 +137,7 @@ function getAndValidateUserChoice() {
     choice = readline.question(MESSAGE.REQ_USER_CHOICE);
   } while (!isValidChoice(choice));
 
-  choice = formatCoordinates(choice.split(''));
+  choice = formatCoordinates(choice);
 
   if (squareIsEmpty(choice, MARKERS.USER)) {
     return choice;
@@ -452,10 +452,10 @@ function machineTurn() {
 function determinePlayOrder() {
   let coinFlip = Math.floor(Math.random() * 10) % 2;
   if (coinFlip) {
-    console.log("User Plays First");
+    console.log(MESSAGE.USER_FIRST);
     return userTurn;
   } else {
-    console.log("Machine Plays First");
+    console.log(MESSAGE.MACHINE_FIRST);
     return machineTurn;
   }
 }

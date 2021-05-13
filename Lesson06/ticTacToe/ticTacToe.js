@@ -5,7 +5,8 @@ let STATE = {
   SCORE: {
     USER: 0,
     MACHINE: 0
-  }
+  },
+  MACHINE_PREF: null
 };
 
 const BACKEND = require("./ticTacToe.json");
@@ -14,7 +15,8 @@ const ERROR = BACKEND.ERROR;
 const HELP = BACKEND.HELP;
 const WINNING_MATCH_SCORE = 5;
 const VALID_CHOICES = '123456789Mm';
-const PREF_SQUARES = [4, 0, 2, 6, 8];
+const PREF_OFFENSIVE_SQUARES = [4, 0, 2, 6, 8];
+const PREF_DEFENSIVE_SQUARE = [4, 1, 3, 5, 7];
 const MARKERS = {
   USER:"  X  ",
   MACHINE:"  O  "
@@ -81,6 +83,7 @@ function isBoardFull() {
 
 function resetBoard() {
   STATE.SQUARES = JSON.parse(JSON.stringify(SQUARES_FOR_RESET));
+  STATE.MACHINE_PREF = null;
 }
 
 function resetScores() {
@@ -248,7 +251,7 @@ function detectThreats() {
 
 function detectPreferentialSquares() {
   let plays = {
-    options: PREF_SQUARES.filter( pos => squareIsEmpty(pos,)),
+    options: STATE.MACHINE_PREF.filter( pos => squareIsEmpty(pos,)),
     exist: null,
     centerFree: null
   };
@@ -326,9 +329,9 @@ function isWinner(player) {
   tests.forEach( func => checks.push(func(marker)));
   if (checks.some( bool => bool)) {
     let winner = (player === "USER" ? "USER_WINS" : "MACHINE_WINS");
+    STATE.SCORE[player]++;
     displayBoard();
     console.log(MESSAGE[winner]);
-    STATE.SCORE[player]++;
     readline.question(MESSAGE.CONTINUE);
     return true;
   } else {
@@ -386,9 +389,11 @@ function determinePlayOrder() {
   let coinFlip = Math.floor(Math.random() * 10) % 2;
   if (coinFlip) {
     console.log(MESSAGE.USER_FIRST);
+    STATE.MACHINE_PREF = PREF_DEFENSIVE_SQUARE;
     return userTurn;
   } else {
     console.log(MESSAGE.MACHINE_FIRST);
+    STATE.MACHINE_PREF = PREF_OFFENSIVE_SQUARES;
     return machineTurn;
   }
 }
@@ -421,6 +426,12 @@ function playMatch() {
     displayBoard();
     playRound();
   } while (!playerWonMatch());
+
+  if (STATE.SCORE.USER === WINNING_MATCH_SCORE) {
+    console.log(MESSAGE.USER_GRAND_WINNER);
+  } else {
+    console.log(MESSAGE.MACHINE_GRAND_WINNER);
+  }
 
   if (playAgain()) {
     playMatch();

@@ -7,6 +7,8 @@
     "CONTINUE": "Press 'Enter' to continue... ",
     "USER_WINS": "YOU WIN!",
     "MACHINE_WINS": "You lose :(",
+    "USER_GRAND_WINNER": "Congratulations, you defeated me!",
+    "MACHINE_GRAND_WINNER": "The machine uprising begins!",
     "PLAY_AGAIN": "Would you like to play again? (Y/N): ",
     "TIE": "It's a tie!",
     "GOODBYE": "Goodbye!"

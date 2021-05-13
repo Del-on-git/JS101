@@ -1,35 +1,30 @@
 //=====================================DECLARATION AND INITIALIZATION OF GLOBALS
 let readline = require("readline-sync");
-let GAMESTATE = {
-  SQUARES: [
-    ['  00 ', '  01 ', '  02 '],
-    ['  10 ', '  11 ', '  12 '],
-    ['  20 ', '  21 ', '  22 ']
-  ],
+let STATE = {
+  SQUARES: ['     ', '     ', '      ', '     ', '     ', '     ', '     ', '     ', '     '],
   SCORE: {
     USER: 0,
     MACHINE: 0
-  }
+  },
+  MACHINE_PREF: null
 };
 
 const BACKEND = require("./ticTacToe.json");
 const MESSAGE = BACKEND.MESSAGES;
 const ERROR = BACKEND.ERROR;
+const HELP = BACKEND.HELP;
 const WINNING_MATCH_SCORE = 5;
-const PREF_SQUARES = [[1, 1], [0, 0], [0, 2], [2, 2], [2, 0]];
+const VALID_CHOICES = '123456789Mm';
+const PREF_OFFENSIVE_SQUARES = [4, 0, 2, 6, 8];
+const PREF_DEFENSIVE_SQUARE = [4, 1, 3, 5, 7];
 const MARKERS = {
   USER:"  X  ",
   MACHINE:"  O  "
 };
-const DIAGONAL_COORDS = [
-  [[1, 1], [0, 0], [2, 2]],
-  [[2, 0], [0, 2], [1, 1]]
-];
-const SQUARES_FOR_RESET = [
-  ['  00 ', '  01 ', '  02 '],
-  ['  10 ', '  11 ', '  12 '],
-  ['  20 ', '  21 ', '  22 ']
-];
+const DIAGONAL_COORDS = [[0, 4, 8], [6, 4, 2]];
+const HORIZON_COORDS = [[0, 1, 2], [3, 4, 5], [6, 7, 8]];
+const VERTICAL_COORDS = [[0, 3, 6], [1, 4, 7], [2, 5, 8]];
+const SQUARES_FOR_RESET = ['     ', '     ', '      ', '     ', '     ', '     ', '     ', '     ', '     '];
 const BARS = {
   first:"-----|-----|-----",
   second:"-----|-----|-----",
@@ -38,28 +33,30 @@ const BARS = {
 
 //=========================================================GAME STATE MANAGEMENT
 function displayScores() {
-  console.log(`Human: ${GAMESTATE.SCORE.USER}, Terminator: ${GAMESTATE.SCORE.MACHINE}`);
+  console.log(`Human: ${STATE.SCORE.USER}, CPU: ${STATE.SCORE.MACHINE}`);
 }
 
 function displayBoard() {
+  console.clear();
+  console.log(`\n${STATE.SQUARES[0]}|${STATE.SQUARES[1]}|${STATE.SQUARES[2]}`);
+  console.log(BARS.first);
+  console.log(`${STATE.SQUARES[3]}|${STATE.SQUARES[4]}|${STATE.SQUARES[5]}`);
+  console.log(BARS.second);
+  console.log(`${STATE.SQUARES[6]}|${STATE.SQUARES[7]}|${STATE.SQUARES[8]}\n`);
   displayScores();
+}
 
-  let entries = Object.values(GAMESTATE.SQUARES);
-  let separators = Object.values(BARS);
-
-  entries.forEach( (arr, idx) => {
-    console.log(arr[0] + '|' + arr[1] + '|' + arr[2]);
-    console.log(separators[idx]);
-  });
+function displayMap() {
+  console.log(HELP.MAP);
+  displayBoard();
 }
 
 function squareIsEmpty(square, playerMarker) {
-  let space = GAMESTATE.SQUARES[square[0]][square[1]];
+  let space = STATE.SQUARES[square];
   if (space === MARKERS.USER || space === MARKERS.MACHINE) {
     if (playerMarker === MARKERS.USER) {
       console.log(ERROR.NON_EMPTY_SQUARE);
     }
-
     return false;
   } else {
     return true;
@@ -67,20 +64,16 @@ function squareIsEmpty(square, playerMarker) {
 }
 
 function insertChoice(choice, playerMarker) {
-  GAMESTATE.SQUARES[choice[0]][choice[1]] = playerMarker;
-  displayBoard();
+  STATE.SQUARES[choice] = playerMarker;
 }
 
 function isBoardFull() {
-  if (GAMESTATE.SQUARES.every( arr => {
-    return arr.every( element => {
-      return element === MARKERS.USER || element === MARKERS.MACHINE;
-    });
-  })
-  ) {
+  if (STATE.SQUARES.every( element => {
+    return element === MARKERS.USER || element === MARKERS.MACHINE;
+  })) {
     displayBoard();
     console.log(MESSAGE.TIE);
-    resetBoard();
+    readline.question(MESSAGE.CONTINUE);
     return true;
 
   } else {
@@ -89,46 +82,30 @@ function isBoardFull() {
 }
 
 function resetBoard() {
-  GAMESTATE.SQUARES = JSON.parse(JSON.stringify(SQUARES_FOR_RESET));
+  STATE.SQUARES = JSON.parse(JSON.stringify(SQUARES_FOR_RESET));
+  STATE.MACHINE_PREF = null;
 }
 
 function resetScores() {
-  GAMESTATE.SCORE.USER = 0;
-  GAMESTATE.SCORE.MACHINE = 0;
-}
-
-function verticalScan() {
-  let verticals = [];
-  let arr = [];
-  for (let col = 0; col < GAMESTATE.SQUARES.length; col++) {
-    for (let row = 0; row < GAMESTATE.SQUARES.length; row++) {
-      arr.push(GAMESTATE.SQUARES[row][col]);
-    }
-    verticals.push(arr);
-    arr = [];
-  }
-
-  return verticals;
+  STATE.SCORE.USER = 0;
+  STATE.SCORE.MACHINE = 0;
 }
 
 //=======================================================USER POSITION SELECTION
 function isValidChoice(choice) {
-  if (choice.length !== 2) {
+  if (VALID_CHOICES.includes(choice))  return true;
+  else {
     console.log(ERROR.INVALID_CHOICE);
     return false;
-  } else if (!'012'.includes(choice[0]) || !'012'.includes(choice[1])) {
-    console.log(ERROR.INVALID_CHOICE);
-    return false;
-  } else {
-    return true;
   }
 }
 
-function formatCoordinates(choice) {
-  choice = choice.split('');
-  choice[0] = Number.parseInt(choice[0], 10);
-  choice[1] = Number.parseInt(choice[1], 10);
-  return choice;
+function formatChoice(choice) {
+  if (!Number.isNaN(Number.parseInt(choice, 10))) {
+    return --choice;
+  } else {
+    return choice.toLowerCase();
+  }
 }
 
 function getAndValidateUserChoice() {
@@ -137,9 +114,12 @@ function getAndValidateUserChoice() {
     choice = readline.question(MESSAGE.REQ_USER_CHOICE);
   } while (!isValidChoice(choice));
 
-  choice = formatCoordinates(choice);
+  choice = formatChoice(choice);
 
-  if (squareIsEmpty(choice, MARKERS.USER)) {
+  if (choice === VALID_CHOICES[VALID_CHOICES.length - 1]) {
+    displayMap();
+    return getAndValidateUserChoice();
+  } else if (squareIsEmpty(choice, MARKERS.USER)) {
     return choice;
   } else {
     return getAndValidateUserChoice();
@@ -149,29 +129,25 @@ function getAndValidateUserChoice() {
 //==============================================================MACHINE STRATEGY
 //*********************************************STRATEGY BACKEND*****************
 function identifyUnblockedPairs(candidates, targetMarker, opposingMarker) {
-  return candidates.filter( arr => {
-    return (arr.reduce( (num, mark) => {
-      if (mark === targetMarker) {
-        num++;
+  candidates = candidates.filter( arr => {
+    return (arr.reduce( (count, idx) => {
+      if (STATE.SQUARES[idx] === targetMarker) {
+        count++;
       }
-      return num;
-    }, 0) === 2 && !arr.includes(opposingMarker));
+      return count;
+    }, 0)) === 2 && !arr.includes(opposingMarker);
   });
+
+  return candidates;
 }
 
 function identifyThirdPosition(candidates, targetMarker) {
   let position = [];
   candidates.forEach( arr => {
     arr.forEach( element => {
-      if (element !== targetMarker) {
-        position.push([element.trim()[0], element.trim()[1]]);
+      if (squareIsEmpty(element) && STATE.SQUARES[element] !== targetMarker) {
+        position.push(element);
       }
-    });
-  });
-
-  position.forEach( (arr) => {
-    arr.forEach( (element, idx) => {
-      arr[idx] = Number.parseInt(element, 10);
     });
   });
 
@@ -179,27 +155,21 @@ function identifyThirdPosition(candidates, targetMarker) {
 }
 
 function detectVerticals(targetMarker, opposingMarker) {
-  let verticals = verticalScan();
+  let verticals = VERTICAL_COORDS;
   verticals = identifyUnblockedPairs(verticals, targetMarker, opposingMarker);
 
   return identifyThirdPosition(verticals, targetMarker);
 }
 
 function detectHorizontals(targetMarker, opposingMarker) {
-  let horiz = GAMESTATE.SQUARES;
+  let horiz = HORIZON_COORDS;
   horiz = identifyUnblockedPairs(horiz, targetMarker, opposingMarker);
 
   return identifyThirdPosition(horiz, targetMarker);
 }
 
 function detectDiagonals(targetMarker, opposingMarker) {
-  let diagonals = [];
-  diagonals.push(DIAGONAL_COORDS[0].map(arr => {
-    return GAMESTATE.SQUARES[arr[0]][arr[1]];
-  }));
-  diagonals.push(DIAGONAL_COORDS[1].map(arr => {
-    return GAMESTATE.SQUARES[arr[0]][arr[1]];
-  }));
+  let diagonals = DIAGONAL_COORDS;
   diagonals = identifyUnblockedPairs(diagonals, targetMarker, opposingMarker);
 
   return identifyThirdPosition(diagonals, targetMarker);
@@ -214,36 +184,16 @@ function doesCrisisExist(candidates) {
   });
 }
 
-function redundantPositions(crises) {
-  let duplicates = [];
-  let candidates = Object.values(crises).map( arr => {
-    return JSON.stringify(arr);
-  });
-
-  while (candidates.length > 0) {
-    let element = candidates.pop();
-    if (candidates.includes(element) && !duplicates.includes(element)) {
-      duplicates.push(element);
-    }
-  }
-
-  return duplicates[0];
-}
-
-function selectCrisis(crisis) {
-  let threat;
-  let candidates = Object.values(crisis).flat().filter( itm => {
+function selectCrisis(crises) {
+  let crisis;
+  let candidates = Object.values(crises).flat().filter( itm => {
     return typeof (itm) !== 'boolean';
   });
-
   if (candidates.length === 1) {
-    threat = candidates[0];
-    return threat;
-  } else if ((threat = redundantPositions(candidates))) {
-    return threat;
+    return candidates[0];
   } else {
-    threat = candidates[Math.floor(Math.random() * (candidates.length - 1))];
-    return threat;
+    crisis = candidates[Math.floor(Math.random() * (candidates.length - 1))];
+    return crisis;
   }
 }
 
@@ -301,45 +251,33 @@ function detectThreats() {
 
 function detectPreferentialSquares() {
   let plays = {
-    options: PREF_SQUARES.filter( arr => squareIsEmpty(arr,)),
+    options: STATE.MACHINE_PREF.filter( pos => squareIsEmpty(pos,)),
     exist: null,
     centerFree: null
   };
-
   plays.exist = (plays.options.length > 0);
-  plays.centerFree = (plays.exist && plays.options[0].join('') === '11');
+  plays.centerFree = (plays.exist && plays.options.includes(4));
 
   return plays;
 }
 
 function chooseCorner(corners) {
-  let cn1 = PREF_SQUARES[1];
-  let cn2 = PREF_SQUARES[2];
-  let cn3 = PREF_SQUARES[3];
-  let cn4 = PREF_SQUARES[4];
-  if (GAMESTATE.SQUARES[cn1[0]][cn1[1]] === MARKERS.USER
-    && squareIsEmpty(cn3)) {
-    return cn3;
-  } else if (GAMESTATE.SQUARES[cn3[0]][cn3[1]] === MARKERS.USER
-    && squareIsEmpty(cn1)) {
-    return cn1;
-  } else if (GAMESTATE.SQUARES[cn2[0]][cn2[1]] === MARKERS.USER
-    && squareIsEmpty(cn4)) {
-    return cn4;
-  } else if (GAMESTATE.SQUARES[cn4[0]][cn4[1]] === MARKERS.USER
-    && squareIsEmpty(cn2)) {
-    return cn2;
-  } else { return corners[Math.floor(Math.random() * corners.length)] }
+  if (STATE.SQUARES[0] === MARKERS.USER && squareIsEmpty(8)) {
+    return 8;
+  } else if (STATE.SQUARES[8] === MARKERS.USER && squareIsEmpty(0)) {
+    return 0;
+  } else if (STATE.SQUARES[6] === MARKERS.USER && squareIsEmpty(2)) {
+    return 2;
+  } else if (STATE.SQUARES[2] === MARKERS.USER && squareIsEmpty(6)) {
+    return 6;
+  } else {
+    return corners[Math.floor(Math.random() * corners.length)];
+  }
 }
 
 //*************************************STRATEGY OF LAST RESORT******************
 function playRandom() {
-  let choice = [];
-  for (let idx = 0; idx < 2; idx++) {
-    choice.push([0,1,2][Math.floor(Math.random() * 3)]);
-  }
-
-  return choice;
+  return Math.floor(Math.random() * 9);
 }
 
 //********************************************EXECUTE STRATEGY******************
@@ -365,24 +303,22 @@ function generateMachineChoice() {
 }
 
 //==============================================================DETERMINE WINNER
-function vertWin(playerMarker) {
-  let verticals = verticalScan();
+function detectVictory(orientation, playerMarker) {
+  return orientation.some( arr => arr.every( entry => {
+    return STATE.SQUARES[entry] === playerMarker;
+  }));
+}
 
-  return verticals.some( arr => arr.every( entry => entry === playerMarker));
+function vertWin(playerMarker) {
+  return detectVictory(VERTICAL_COORDS, playerMarker);
 }
 
 function horzWin(playerMarker) {
-  return GAMESTATE.SQUARES.some( arr => {
-    return arr.every( entry => entry === playerMarker);
-  });
+  return detectVictory(HORIZON_COORDS, playerMarker);
 }
 
 function diagWin(playerMarker) {
-  return DIAGONAL_COORDS.some( arr => {
-    return arr.every( entry => {
-      return GAMESTATE.SQUARES[entry[0]][entry[1]] === playerMarker;
-    });
-  });
+  return detectVictory(DIAGONAL_COORDS, playerMarker);
 }
 
 function isWinner(player) {
@@ -393,10 +329,10 @@ function isWinner(player) {
   tests.forEach( func => checks.push(func(marker)));
   if (checks.some( bool => bool)) {
     let winner = (player === "USER" ? "USER_WINS" : "MACHINE_WINS");
+    STATE.SCORE[player]++;
     displayBoard();
     console.log(MESSAGE[winner]);
-    GAMESTATE.SCORE[player]++;
-    resetBoard();
+    readline.question(MESSAGE.CONTINUE);
     return true;
   } else {
     return false;
@@ -404,8 +340,8 @@ function isWinner(player) {
 }
 
 function playerWonMatch() {
-  if (GAMESTATE.SCORE.USER === WINNING_MATCH_SCORE
-    || GAMESTATE.SCORE.MACHINE === WINNING_MATCH_SCORE) {
+  if (STATE.SCORE.USER === WINNING_MATCH_SCORE
+    || STATE.SCORE.MACHINE === WINNING_MATCH_SCORE) {
     resetScores();
     return true;
   } else {
@@ -453,9 +389,11 @@ function determinePlayOrder() {
   let coinFlip = Math.floor(Math.random() * 10) % 2;
   if (coinFlip) {
     console.log(MESSAGE.USER_FIRST);
+    STATE.MACHINE_PREF = PREF_DEFENSIVE_SQUARE;
     return userTurn;
   } else {
     console.log(MESSAGE.MACHINE_FIRST);
+    STATE.MACHINE_PREF = PREF_OFFENSIVE_SQUARES;
     return machineTurn;
   }
 }
@@ -463,26 +401,41 @@ function determinePlayOrder() {
 function playRound() {
   let firstPlayer = determinePlayOrder();
   let secondPlayer;
-  if (firstPlayer === userTurn) {
-    secondPlayer = machineTurn;
-  } else {
-    secondPlayer = userTurn;
-  }
+  if (firstPlayer === userTurn)  secondPlayer = machineTurn;
+  else  secondPlayer = userTurn;
 
   do {
+    if (!firstPlayer()) {
+      displayBoard();
+      if (secondPlayer()) {
+        displayBoard();
+        break;
+      }
+    } else {
+      displayBoard();
+      break;
+    }
     displayBoard();
-  } while (!firstPlayer() && !secondPlayer());
+  } while (true);
+
+  resetBoard();
 }
 
 function playMatch() {
   do {
+    displayBoard();
     playRound();
   } while (!playerWonMatch());
+
+  if (STATE.SCORE.USER === WINNING_MATCH_SCORE) {
+    console.log(MESSAGE.USER_GRAND_WINNER);
+  } else {
+    console.log(MESSAGE.MACHINE_GRAND_WINNER);
+  }
 
   if (playAgain()) {
     playMatch();
   }
 }
-
 //=================================================================START PROGRAM
 playMatch();

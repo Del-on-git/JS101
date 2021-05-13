@@ -4,6 +4,7 @@
     "USER_FIRST": "User Plays First",
     "MACHINE_FIRST": "Machine Plays First",
     "REQ_USER_CHOICE": "What square would you like to play? (Press 'M' for a board map)\nSelect 1, 2, 3, 4, 5, 6, 7, 8, or  9: ",
+    "CONTINUE": "Press 'Enter' to continue... ",
     "USER_WINS": "YOU WIN!",
     "MACHINE_WINS": "You lose :(",
     "PLAY_AGAIN": "Would you like to play again? (Y/N): ",

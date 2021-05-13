@@ -35,6 +35,7 @@ function displayScores() {
 }
 
 function displayBoard() {
+  console.clear();
   console.log(`\n${STATE.SQUARES[0]}|${STATE.SQUARES[1]}|${STATE.SQUARES[2]}`);
   console.log(BARS.first);
   console.log(`${STATE.SQUARES[3]}|${STATE.SQUARES[4]}|${STATE.SQUARES[5]}`);
@@ -70,6 +71,7 @@ function isBoardFull() {
   })) {
     displayBoard();
     console.log(MESSAGE.TIE);
+    readline.question(MESSAGE.CONTINUE);
     return true;
 
   } else {
@@ -272,12 +274,7 @@ function chooseCorner(corners) {
 
 //*************************************STRATEGY OF LAST RESORT******************
 function playRandom() {
-  let choice = [];
-  for (let idx = 0; idx < 2; idx++) {
-    choice.push([0,1,2][Math.floor(Math.random() * 3)]);
-  }
-
-  return choice;
+  return Math.floor(Math.random() * 9);
 }
 
 //********************************************EXECUTE STRATEGY******************
@@ -332,6 +329,7 @@ function isWinner(player) {
     displayBoard();
     console.log(MESSAGE[winner]);
     STATE.SCORE[player]++;
+    readline.question(MESSAGE.CONTINUE);
     return true;
   } else {
     return false;
@@ -430,5 +428,3 @@ function playMatch() {
 }
 //=================================================================START PROGRAM
 playMatch();
-
-//TODO: Figure out why the machine freezes when it catches two simultaneous threats and fix it

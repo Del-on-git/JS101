@@ -1,0 +1,8 @@
+{
+  "MESSAGES": {
+    "DEALER_SHOWING_NO_HOLE": "Dealer has one in the hole and shows a ",
+    "PLAYER_HAND": "You're holding:",
+    "TALLY_BAR": "-------------------------",
+    "PLAYER_VALUE": "Worth:"
+  }
+}

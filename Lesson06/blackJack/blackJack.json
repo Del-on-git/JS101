@@ -1,8 +1,13 @@
 {
   "MESSAGES": {
-    "DEALER_SHOWING_NO_HOLE": "Dealer has one in the hole and shows a ",
-    "PLAYER_HAND": "You're holding:",
+    "DEALER_SHOW_UPCARD_ONLY": "Dealer has one in the hole and shows a ",
+    "HIT_OR_STAY": "(H)it or (S)tay: ",
+    "DEALER_HAND_PROMPT": "Dealer's holding: ",
+    "PLAYER_HAND_PROMPT": "You're holding: ",
     "TALLY_BAR": "-------------------------",
-    "PLAYER_VALUE": "Worth:"
+    "PLAYER_BUSTS": "You busted! Dealer wins"
+  },
+  "ERRORS": {
+    "INVALID_REPSONSE": "Please select 'H' to hit or 'S' to stay."
   }
 }

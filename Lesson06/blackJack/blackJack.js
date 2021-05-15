@@ -6,6 +6,8 @@ const ACE_LOW_VAL = 1;
 const FACECARDS = 'JQK';
 const FACECARD_VAL = 10;
 const OPTIMAL_SCORE = 21;
+const DEALER_STOP = 17;
+const VALID_REPSONSES = 'HS';
 const DECK = {
   RANK: [
     '2 of ' ,'3 of ', '4 of ', '5 of ', '6 of ', '7 of ', '8 of ',
@@ -20,14 +22,20 @@ const MASTER_DECK_POSITIONS = [
   'S.2', 'S.3', 'S.4', 'S.5', 'S.6', 'S.7', 'S.8', 'S.9', 'S.10', 'S.J', 'S.Q', 'S.K', 'S.A'
 ];
 
+let readline = require('readline-sync');
+
 let GAMESTATE = {
   PLAYER_HAND: {
     VALUE: 0,
-    CARDS: []
+    CARDS: [],
+    BUSTED: false,
+    IDENT: "PLAYER"
   },
   DEALER_HAND: {
     VALUE: 0,
-    CARDS: []
+    CARDS: [],
+    BUSTED: false,
+    IDENT: "DEALER"
   },
   DECK_POSITIONS: [
     'C.2', 'C.3', 'C.4', 'C.5', 'C.6', 'C.7', 'C.8', 'C.9', 'C.10', 'C.J', 'C.Q', 'C.K', 'C.A',
@@ -80,12 +88,6 @@ function updateHandValue(player, card) {
   }
 }
 
-function drawCard(player) {
-  let card = GAMESTATE.DECK_POSITIONS.pop().split('.');
-  updateHandCards(player, card);
-  updateHandValue(player, card);
-}
-
 function dealCards() {
   shuffleCards();
   for (let count = 0; count < 2; count++) {
@@ -94,23 +96,113 @@ function dealCards() {
   }
 }
 
-function showDealerHandNoHoleCard() {
-  console.log(MESSAGE.DEALER_SHOWING_NO_HOLE + GAMESTATE.DEALER_HAND.CARDS[0] + '\n');
+function drawCard(player) {
+  let card = GAMESTATE.DECK_POSITIONS.pop().split('.');
+  updateHandCards(player, card);
+  updateHandValue(player, card);
 }
 
-function showPlayerHand() {
-  console.log(MESSAGE.PLAYER_HAND);
-  GAMESTATE.PLAYER_HAND.CARDS.forEach( card => {
+function isValidResponse(input) {
+  if (VALID_REPSONSES.includes(input)) {
+    return true;
+  } else {
+    return getAndValidateUserResponse();
+  }
+}
+
+function getAndValidateUserResponse() {
+  let input;
+  do {
+    input = readline.question(MESSAGE.HIT_OR_STAY).toUpperCase();
+  } while (!isValidResponse(input));
+
+  return input;
+}
+
+function busted(player) {
+  if (player.VALUE > OPTIMAL_SCORE) {
+    player.BUSTED = true;
+    return true;
+  }
+
+  return false;
+}
+
+function hitStay(player) {
+  if (player.IDENT === "PLAYER") {
+    if (getAndValidateUserResponse() === 'H') {
+      console.clear();
+      drawCard(player);
+      return true;
+    } else {
+      console.clear();
+      return false;
+    }
+  } else {
+    while (player.VALUE < DEALER_STOP) {
+      drawCard(player);
+    }
+  }
+}
+
+function showDealerHandUpcardOnly() {
+  console.log(MESSAGE.DEALER_SHOW_UPCARD_ONLY + GAMESTATE.DEALER_HAND.CARDS[0] + '\n');
+}
+
+function showHand(player) {
+  console.log(MESSAGE.TALLY_BAR);
+  if (player.IDENT === "PLAYER") {
+    console.log(MESSAGE.PLAYER_HAND_PROMPT + player.VALUE);
+  } else if (player.IDENT === "DEALER") {
+    console.log(MESSAGE.DEALER_HAND_PROMPT + player.VALUE);
+  }
+  console.log(MESSAGE.TALLY_BAR);
+
+  player.CARDS.forEach( card => {
     console.log(`\t${card}`);
   });
   console.log(MESSAGE.TALLY_BAR);
-  console.log(`${MESSAGE.PLAYER_VALUE}\t${GAMESTATE.PLAYER_HAND.VALUE}`);
+  //console.log(`${MESSAGE.VALUE_PROMPT}\t${player.VALUE}\n`);
+}
+
+function declareTie() {
+  console.log("TIE: BET'S A PUSH");
+}
+
+function declareForPlayer(dealer) {
+  if (dealer.BUSTED) console.log("DEALER BUSTS");
+  console.log("PLAYER WINS!");
+}
+
+function declareForDealer(player) {
+  if (player.BUSTED) console.log("YOU BUSTED");
+  console.log("DEALER WINS!");
+}
+
+function determineWinner(dealer, player) {
+  if (dealer.VALUE === player.VALUE) {
+    declareTie();
+  } else if (player.BUSTED || player.VALUE < dealer.VALUE) {
+    declareForDealer(player);
+  } else if (dealer.VALUE < player.VALUE) {
+    declareForPlayer(dealer);
+  }
 }
 
 function playHand() {
   dealCards();
-  showDealerHandNoHoleCard();
-  showPlayerHand();
+  showDealerHandUpcardOnly();
+  showHand(GAMESTATE.PLAYER_HAND);
+  while (hitStay(GAMESTATE.PLAYER_HAND) && !busted(GAMESTATE.PLAYER_HAND)) {
+    showDealerHandUpcardOnly();
+    showHand(GAMESTATE.PLAYER_HAND);
+  }
+  hitStay(GAMESTATE.DEALER_HAND);
+  showHand(GAMESTATE.PLAYER_HAND);
+  showHand(GAMESTATE.DEALER_HAND);
+  determineWinner(GAMESTATE.DEALER_HAND, GAMESTATE.PLAYER_HAND);
 }
 
 playHand();
+
+//TODO: Write functions for continuous play, including a reshuffle limit

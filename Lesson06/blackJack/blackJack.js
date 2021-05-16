@@ -1,5 +1,6 @@
 const BACKEND = require('./blackJack.json');
 const MESSAGE = BACKEND.MESSAGES;
+const ERROR = BACKEND.ERRORS;
 
 const ACE_HIGH_VAL = 11;
 const ACE_LOW_VAL = 1;
@@ -21,6 +22,7 @@ const MASTER_DECK_POSITIONS = [
   'H.2', 'H.3', 'H.4', 'H.5', 'H.6', 'H.7', 'H.8', 'H.9', 'H.10', 'H.J', 'H.Q', 'H.K', 'H.A',
   'S.2', 'S.3', 'S.4', 'S.5', 'S.6', 'S.7', 'S.8', 'S.9', 'S.10', 'S.J', 'S.Q', 'S.K', 'S.A'
 ];
+const RESHUFFLE_LIMIT = Math.ceil(MASTER_DECK_POSITIONS.length * 0.5);
 
 let readline = require('readline-sync');
 
@@ -58,6 +60,24 @@ function shuffleCards() {
   temp.forEach( element => GAMESTATE.DECK_POSITIONS.push(element));
 }
 
+function checkForReshuffle() {
+  if (GAMESTATE.DECK_POSITIONS.length <= RESHUFFLE_LIMIT) {
+    console.log("RESHUFFLING=================================================");
+    shuffleCards();
+  }
+}
+
+function resetHands() {
+  GAMESTATE.PLAYER_HAND.VALUE = 0;
+  GAMESTATE.DEALER_HAND.VALUE = 0;
+
+  GAMESTATE.PLAYER_HAND.CARDS.length = 0;
+  GAMESTATE.DEALER_HAND.CARDS.length = 0;
+
+  GAMESTATE.PLAYER_HAND.BUSTED = false;
+  GAMESTATE.DEALER_HAND.BUSTED = false;
+}
+
 function updateHandCards(player, card) {
   let cardName = [];
   DECK.RANK.forEach( str => {
@@ -89,7 +109,6 @@ function updateHandValue(player, card) {
 }
 
 function dealCards() {
-  shuffleCards();
   for (let count = 0; count < 2; count++) {
     drawCard(GAMESTATE.PLAYER_HAND);
     drawCard(GAMESTATE.DEALER_HAND);
@@ -106,6 +125,7 @@ function isValidResponse(input) {
   if (VALID_REPSONSES.includes(input)) {
     return true;
   } else {
+    console.log(ERROR.INVALID_HIT_STAY);
     return getAndValidateUserResponse();
   }
 }
@@ -142,6 +162,7 @@ function hitStay(player) {
     while (player.VALUE < DEALER_STOP) {
       drawCard(player);
     }
+    return undefined;
   }
 }
 
@@ -162,7 +183,6 @@ function showHand(player) {
     console.log(`\t${card}`);
   });
   console.log(MESSAGE.TALLY_BAR);
-  //console.log(`${MESSAGE.VALUE_PROMPT}\t${player.VALUE}\n`);
 }
 
 function declareTie() {
@@ -189,6 +209,22 @@ function determineWinner(dealer, player) {
   }
 }
 
+function continuePlaying() {
+  let input = readline.question(MESSAGE.PLAY_AGAIN).toUpperCase();
+  switch (input) {
+    case 'Y':
+      resetHands();
+      checkForReshuffle();
+      return true;
+    case 'N':
+      console.log(MESSAGE.GOODBYE);
+      return false;
+    default:
+      console.log(ERROR.INVALID_CONTINUE);
+      return continuePlaying();
+  }
+}
+
 function playHand() {
   dealCards();
   showDealerHandUpcardOnly();
@@ -203,6 +239,12 @@ function playHand() {
   determineWinner(GAMESTATE.DEALER_HAND, GAMESTATE.PLAYER_HAND);
 }
 
-playHand();
+function playGame() {
+  console.log(MESSAGE.GREET);
+  shuffleCards();
+  do {
+    playHand();
+  } while (continuePlaying());
+}
 
-//TODO: Write functions for continuous play, including a reshuffle limit
+playGame();

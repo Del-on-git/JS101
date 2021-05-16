@@ -5,9 +5,13 @@
     "DEALER_HAND_PROMPT": "Dealer's holding: ",
     "PLAYER_HAND_PROMPT": "You're holding: ",
     "TALLY_BAR": "-------------------------",
-    "PLAYER_BUSTS": "You busted! Dealer wins"
+    "PLAYER_BUSTS": "You busted! Dealer wins",
+    "PLAY_AGAIN": "Would you like to play again? (Y/N): ",
+    "GREET": "Welcome to the table, stranger. Let's play some blackjack!",
+    "GOODBYE": "Goodbye!"
   },
   "ERRORS": {
-    "INVALID_REPSONSE": "Please select 'H' to hit or 'S' to stay."
+    "INVALID_HIT_STAY": "Please select 'H' to hit or 'S' to stay.",
+    "INVALID_CONTINUE": "Please select 'Y' to continue or 'N' to quit."
   }
 }

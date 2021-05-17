@@ -12,7 +12,10 @@
     "DEALER_WINS": "\n+-------------------+\n|    DEALER WINS!   |\n+-------------------+\n",
     "PLAYER_BUSTS":"\n!!!!PLAYER BUSTED!!!!\n",
     "DEALER_BUSTS":"\n!!!!DEALER BUSTED!!!!\n",
-    "TIE": "+------------------------+\n|    TIE: BET'S A PUSH   |\n+------------------------+\n"
+    "TIE": "+------------------------+\n|    TIE: BET'S A PUSH   |\n+------------------------+\n",
+    "PLAYER_GRAND_WINNER": "Congratulations; You're the grand winner",
+    "DEALER_GRAND_WINNER": "Sorry; the house won this round.",
+    "CONTINUE": "Press 'Enter' for the next hand."
 
   },
   "ERRORS": {

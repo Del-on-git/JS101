@@ -26,17 +26,19 @@ const MASTER_DECK_POSITIONS = [
 const RESHUFFLE_LIMIT = Math.ceil(MASTER_DECK_POSITIONS.length * 0.5);
 
 let readline = require('readline-sync');
-let GAMESTATE = {
-  PLAYER_HAND: {
-    VALUE: 0,
-    CARDS: [],
+let gameState = {
+  playerHand: {
+    total: 0,
+    values: [],
+    cards: [],
     BUSTED: false,
     SCORE: 0,
     IDENT: "PLAYER"
   },
-  DEALER_HAND: {
-    VALUE: 0,
-    CARDS: [],
+  dealerHand: {
+    total: 0,
+    values: [],
+    cards: [],
     BUSTED: false,
     SCORE: 0,
     IDENT: "DEALER"
@@ -50,38 +52,41 @@ let GAMESTATE = {
 };
 
 function shuffleCards() {
-  GAMESTATE.DECK_POSITIONS = JSON.parse(JSON.stringify(MASTER_DECK_POSITIONS));
+  gameState.DECK_POSITIONS = JSON.parse(JSON.stringify(MASTER_DECK_POSITIONS));
 
   let temp = [];
-  while (GAMESTATE.DECK_POSITIONS.length > 0) {
-    let idx = Math.floor(Math.random() * GAMESTATE.DECK_POSITIONS.length);
-    temp.push(GAMESTATE.DECK_POSITIONS[idx]);
-    GAMESTATE.DECK_POSITIONS.splice(idx, 1);
+  while (gameState.DECK_POSITIONS.length > 0) {
+    let idx = Math.floor(Math.random() * gameState.DECK_POSITIONS.length);
+    temp.push(gameState.DECK_POSITIONS[idx]);
+    gameState.DECK_POSITIONS.splice(idx, 1);
   }
 
-  temp.forEach( element => GAMESTATE.DECK_POSITIONS.push(element));
+  temp.forEach( element => gameState.DECK_POSITIONS.push(element));
 }
 
 function checkForReshuffle() {
-  if (GAMESTATE.DECK_POSITIONS.length <= RESHUFFLE_LIMIT) {
+  if (gameState.DECK_POSITIONS.length <= RESHUFFLE_LIMIT) {
     shuffleCards();
   }
 }
 
 function resetHands() {
-  GAMESTATE.PLAYER_HAND.VALUE = 0;
-  GAMESTATE.DEALER_HAND.VALUE = 0;
+  gameState.playerHand.total = 0;
+  gameState.dealerHand.total = 0;
 
-  GAMESTATE.PLAYER_HAND.CARDS.length = 0;
-  GAMESTATE.DEALER_HAND.CARDS.length = 0;
+  gameState.playerHand.values = [];
+  gameState.dealerHand.values = [];
 
-  GAMESTATE.PLAYER_HAND.BUSTED = false;
-  GAMESTATE.DEALER_HAND.BUSTED = false;
+  gameState.playerHand.cards.length = 0;
+  gameState.dealerHand.cards.length = 0;
+
+  gameState.playerHand.BUSTED = false;
+  gameState.dealerHand.BUSTED = false;
 }
 
 function resetScores() {
-  GAMESTATE.PLAYER_HAND.SCORE = 0;
-  GAMESTATE.DEALER_HAND.SCORE = 0;
+  gameState.playerHand.SCORE = 0;
+  gameState.dealerHand.SCORE = 0;
 }
 
 function updateHandCards(player, card) {
@@ -93,36 +98,54 @@ function updateHandCards(player, card) {
   DECK.SUIT.forEach( str => {
     if (str[0] === card[0]) cardName.push(str);
   });
-  player.CARDS.push(cardName.join(''));
+  player.cards.push(cardName.join(''));
 }
 
 function determineAceValue(player) {
-  if (player.VALUE + ACE_HIGH_VAL > OPTIMAL_SCORE) {
-    player.VALUE += ACE_LOW_VAL;
+  if (player.values + ACE_HIGH_VAL > OPTIMAL_SCORE) {
+    player.values.push(ACE_LOW_VAL);
   } else {
-    player.VALUE += ACE_HIGH_VAL;
+    player.values.push(ACE_HIGH_VAL);
   }
+}
+
+function downgradeAces(player) {
+  if (player.total > OPTIMAL_SCORE) {
+    player.values.forEach( (val, idx) => {
+      if (val === ACE_HIGH_VAL) {
+        player.values[idx] = ACE_LOW_VAL;
+      }
+    });
+  }
+
+  tallyCards(player);
 }
 
 function updateHandValue(player, card) {
   if (FACECARDS.includes(card[1])) {
-    player.VALUE += FACECARD_VAL;
+    player.values.push(FACECARD_VAL);
   } else if (card[1] === 'A') {
     determineAceValue(player);
   } else {
-    player.VALUE += Number.parseInt(card[1], 10);
+    player.values.push(Number.parseInt(card[1], 10));
   }
+
+  tallyCards(player);
+}
+
+function tallyCards(player) {
+  player.total = player.values.reduce( (sum, val) => sum + val, 0);
 }
 
 function dealCards() {
   for (let count = 0; count < 2; count++) {
-    drawCard(GAMESTATE.PLAYER_HAND);
-    drawCard(GAMESTATE.DEALER_HAND);
+    drawCard(gameState.playerHand);
+    drawCard(gameState.dealerHand);
   }
 }
 
 function drawCard(player) {
-  let card = GAMESTATE.DECK_POSITIONS.pop().split('.');
+  let card = gameState.DECK_POSITIONS.pop().split('.');
   updateHandCards(player, card);
   updateHandValue(player, card);
 }
@@ -146,7 +169,7 @@ function getAndValidateUserResponse() {
 }
 
 function busted(player) {
-  if (player.VALUE > OPTIMAL_SCORE) {
+  if (player.total > OPTIMAL_SCORE) {
     player.BUSTED = true;
     return true;
   }
@@ -159,14 +182,16 @@ function hitStay(player) {
     if (getAndValidateUserResponse() === 'H') {
       console.clear();
       drawCard(player);
+      downgradeAces(player);
       return true;
     } else {
       console.clear();
       return false;
     }
   } else {
-    while (player.VALUE < DEALER_STOP) {
+    while (player.total < DEALER_STOP) {
       drawCard(player);
+      downgradeAces(player);
     }
     return undefined;
   }
@@ -177,19 +202,19 @@ function displayScore(player, dealer) {
 }
 
 function showDealerHandUpcardOnly() {
-  console.log(MESSAGE.DEALER_SHOW_UPCARD_ONLY + GAMESTATE.DEALER_HAND.CARDS[0] + '\n');
+  console.log(MESSAGE.DEALER_SHOW_UPCARD_ONLY + gameState.dealerHand.cards[0] + '\n');
 }
 
 function showHand(player) {
   console.log(MESSAGE.TALLY_BAR);
   if (player.IDENT === "PLAYER") {
-    console.log(MESSAGE.PLAYER_HAND_PROMPT + player.VALUE);
+    console.log(MESSAGE.PLAYER_HAND_PROMPT + player.total);
   } else if (player.IDENT === "DEALER") {
-    console.log(MESSAGE.DEALER_HAND_PROMPT + player.VALUE);
+    console.log(MESSAGE.DEALER_HAND_PROMPT + player.total);
   }
   console.log(MESSAGE.TALLY_BAR);
 
-  player.CARDS.forEach( card => {
+  player.cards.forEach( card => {
     console.log(`\t${card}`);
   });
   console.log(MESSAGE.TALLY_BAR);
@@ -217,13 +242,13 @@ function declareForDealer(player, dealer) {
 function determineWinner(dealer, player) {
   if (player.BUSTED) {
     declareForDealer(player, dealer);
-  } else if (player.VALUE < dealer.VALUE && !dealer.BUSTED) {
+  } else if (player.values < dealer.values && !dealer.BUSTED) {
     declareForDealer(player, dealer);
-  } else if (player.VALUE < dealer.VALUE && dealer.BUSTED) {
+  } else if (player.values < dealer.values && dealer.BUSTED) {
     declareForPlayer(player, dealer);
-  } else if (dealer.VALUE < player.VALUE) {
+  } else if (dealer.values < player.values) {
     declareForPlayer(player, dealer);
-  } else if (dealer.VALUE === player.VALUE) {
+  } else if (dealer.values === player.values) {
     declareTie();
   }
 }
@@ -268,18 +293,18 @@ function continueGame() {
 function playHand() {
   dealCards();
   showDealerHandUpcardOnly();
-  showHand(GAMESTATE.PLAYER_HAND);
-  while (hitStay(GAMESTATE.PLAYER_HAND) && !busted(GAMESTATE.PLAYER_HAND)) {
-    displayScore(GAMESTATE.PLAYER_HAND, GAMESTATE.DEALER_HAND);
+  showHand(gameState.playerHand);
+  while (hitStay(gameState.playerHand) && !busted(gameState.playerHand)) {
+    displayScore(gameState.playerHand, gameState.dealerHand);
     showDealerHandUpcardOnly();
-    showHand(GAMESTATE.PLAYER_HAND);
+    showHand(gameState.playerHand);
   }
-  hitStay(GAMESTATE.DEALER_HAND);
-  displayScore(GAMESTATE.PLAYER_HAND, GAMESTATE.DEALER_HAND);
-  busted(GAMESTATE.DEALER_HAND);
-  showHand(GAMESTATE.PLAYER_HAND);
-  showHand(GAMESTATE.DEALER_HAND);
-  determineWinner(GAMESTATE.DEALER_HAND, GAMESTATE.PLAYER_HAND);
+  hitStay(gameState.dealerHand);
+  displayScore(gameState.playerHand, gameState.dealerHand);
+  busted(gameState.dealerHand);
+  showHand(gameState.playerHand);
+  showHand(gameState.dealerHand);
+  determineWinner(gameState.dealerHand, gameState.playerHand);
   continueGame();
   checkForReshuffle();
 }
@@ -289,9 +314,9 @@ function playGame() {
   console.log(MESSAGE.GREET);
   shuffleCards();
   do {
-    displayScore(GAMESTATE.PLAYER_HAND, GAMESTATE.DEALER_HAND);
+    displayScore(gameState.playerHand, gameState.dealerHand);
     playHand();
-  } while (noMatchWinner(GAMESTATE.PLAYER_HAND, GAMESTATE.DEALER_HAND));
+  } while (noMatchWinner(gameState.playerHand, gameState.dealerHand));
 
   if (playAgain()) {
     playGame();

@@ -128,7 +128,7 @@ function drawCard(player) {
 }
 
 function isValidResponse(input) {
-  if (VALID_REPSONSES.includes(input)) {
+  if (VALID_REPSONSES.includes(input) && input !== '') {
     return true;
   } else {
     console.log(ERROR.INVALID_HIT_STAY);

@@ -9,6 +9,7 @@ const FACECARD_VAL = 10;
 const OPTIMAL_SCORE = 21;
 const DEALER_STOP = 17;
 const VALID_REPSONSES = 'HS';
+const WINNING_MATCH_SCORE = 5;
 const DECK = {
   RANK: [
     '2 of ' ,'3 of ', '4 of ', '5 of ', '6 of ', '7 of ', '8 of ',
@@ -25,18 +26,19 @@ const MASTER_DECK_POSITIONS = [
 const RESHUFFLE_LIMIT = Math.ceil(MASTER_DECK_POSITIONS.length * 0.5);
 
 let readline = require('readline-sync');
-
 let GAMESTATE = {
   PLAYER_HAND: {
     VALUE: 0,
     CARDS: [],
     BUSTED: false,
+    SCORE: 0,
     IDENT: "PLAYER"
   },
   DEALER_HAND: {
     VALUE: 0,
     CARDS: [],
     BUSTED: false,
+    SCORE: 0,
     IDENT: "DEALER"
   },
   DECK_POSITIONS: [
@@ -62,7 +64,6 @@ function shuffleCards() {
 
 function checkForReshuffle() {
   if (GAMESTATE.DECK_POSITIONS.length <= RESHUFFLE_LIMIT) {
-    console.log("RESHUFFLING=================================================");
     shuffleCards();
   }
 }
@@ -76,6 +77,11 @@ function resetHands() {
 
   GAMESTATE.PLAYER_HAND.BUSTED = false;
   GAMESTATE.DEALER_HAND.BUSTED = false;
+}
+
+function resetScores() {
+  GAMESTATE.PLAYER_HAND.SCORE = 0;
+  GAMESTATE.DEALER_HAND.SCORE = 0;
 }
 
 function updateHandCards(player, card) {
@@ -166,6 +172,10 @@ function hitStay(player) {
   }
 }
 
+function displayScore(player, dealer) {
+  console.log(`DEALER SCORE: ${dealer.SCORE} <<>> PLAYER SCORE: ${player.SCORE}\n`);
+}
+
 function showDealerHandUpcardOnly() {
   console.log(MESSAGE.DEALER_SHOW_UPCARD_ONLY + GAMESTATE.DEALER_HAND.CARDS[0] + '\n');
 }
@@ -186,43 +196,73 @@ function showHand(player) {
 }
 
 function declareTie() {
-  console.log("TIE: BET'S A PUSH");
+  resetHands();
+  console.log(MESSAGE.TIE);
 }
 
-function declareForPlayer(dealer) {
-  if (dealer.BUSTED) console.log("DEALER BUSTS");
-  console.log("PLAYER WINS!");
+function declareForPlayer(player, dealer) {
+  resetHands();
+  player.SCORE++;
+  if (dealer.BUSTED) console.log(MESSAGE.DEALER_BUSTS);
+  console.log(MESSAGE.PLAYER_WINS);
 }
 
-function declareForDealer(player) {
-  if (player.BUSTED) console.log("YOU BUSTED");
-  console.log("DEALER WINS!");
+function declareForDealer(player, dealer) {
+  resetHands();
+  dealer.SCORE++;
+  if (player.BUSTED) console.log(MESSAGE.PLAYER_BUSTS);
+  console.log(MESSAGE.DEALER_WINS);
 }
 
 function determineWinner(dealer, player) {
-  if (dealer.VALUE === player.VALUE) {
-    declareTie();
-  } else if (player.BUSTED || player.VALUE < dealer.VALUE) {
-    declareForDealer(player);
+  if (player.BUSTED) {
+    declareForDealer(player, dealer);
+  } else if (player.VALUE < dealer.VALUE && !dealer.BUSTED) {
+    declareForDealer(player, dealer);
+  } else if (player.VALUE < dealer.VALUE && dealer.BUSTED) {
+    declareForPlayer(player, dealer);
   } else if (dealer.VALUE < player.VALUE) {
-    declareForPlayer(dealer);
+    declareForPlayer(player, dealer);
+  } else if (dealer.VALUE === player.VALUE) {
+    declareTie();
   }
 }
 
-function continuePlaying() {
+function noMatchWinner(player, dealer) {
+  if (player.SCORE >= WINNING_MATCH_SCORE) {
+    displayScore(player, dealer);
+    console.log(MESSAGE.PLAYER_GRAND_WINNER);
+    return false;
+  } else if (dealer.SCORE >= WINNING_MATCH_SCORE) {
+    displayScore(player, dealer);
+    console.log(MESSAGE.DEALER_GRAND_WINNER);
+    return false;
+  }
+
+  return true;
+}
+
+function playAgain() {
   let input = readline.question(MESSAGE.PLAY_AGAIN).toUpperCase();
   switch (input) {
     case 'Y':
       resetHands();
+      resetScores();
       checkForReshuffle();
+      console.clear();
       return true;
     case 'N':
       console.log(MESSAGE.GOODBYE);
       return false;
     default:
       console.log(ERROR.INVALID_CONTINUE);
-      return continuePlaying();
+      return playAgain();
   }
+}
+
+function continueGame() {
+  readline.question(MESSAGE.CONTINUE);
+  console.clear();
 }
 
 function playHand() {
@@ -230,21 +270,32 @@ function playHand() {
   showDealerHandUpcardOnly();
   showHand(GAMESTATE.PLAYER_HAND);
   while (hitStay(GAMESTATE.PLAYER_HAND) && !busted(GAMESTATE.PLAYER_HAND)) {
+    displayScore(GAMESTATE.PLAYER_HAND, GAMESTATE.DEALER_HAND);
     showDealerHandUpcardOnly();
     showHand(GAMESTATE.PLAYER_HAND);
   }
   hitStay(GAMESTATE.DEALER_HAND);
+  displayScore(GAMESTATE.PLAYER_HAND, GAMESTATE.DEALER_HAND);
+  busted(GAMESTATE.DEALER_HAND);
   showHand(GAMESTATE.PLAYER_HAND);
   showHand(GAMESTATE.DEALER_HAND);
   determineWinner(GAMESTATE.DEALER_HAND, GAMESTATE.PLAYER_HAND);
+  continueGame();
+  checkForReshuffle();
 }
 
 function playGame() {
+  console.clear();
   console.log(MESSAGE.GREET);
   shuffleCards();
   do {
+    displayScore(GAMESTATE.PLAYER_HAND, GAMESTATE.DEALER_HAND);
     playHand();
-  } while (continuePlaying());
+  } while (noMatchWinner(GAMESTATE.PLAYER_HAND, GAMESTATE.DEALER_HAND));
+
+  if (playAgain()) {
+    playGame();
+  }
 }
 
 playGame();

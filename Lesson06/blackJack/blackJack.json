@@ -6,7 +6,7 @@
     "PLAYER_HAND_PROMPT": "You're holding: ",
     "TALLY_BAR": "-------------------------",
     "PLAY_AGAIN": "Would you like to play again? (Y/N): ",
-    "GREET": "\nWelcome to the table, stranger. Let's play some blackjack!\n",
+    "GREET": "\nWelcome to the table, stranger.\n\tLet's play some blackjack!\n\t\tFive hands wins the match.\n",
     "GOODBYE": "Goodbye!",
     "PLAYER_WINS": "\n+-------------------+\n|    PLAYER WINS!   |\n+-------------------+\n",
     "DEALER_WINS": "\n+-------------------+\n|    DEALER WINS!   |\n+-------------------+\n",

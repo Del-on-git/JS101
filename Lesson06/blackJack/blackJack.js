@@ -302,8 +302,8 @@ function playHand() {
   hitStay(gameState.dealerHand);
   displayScore(gameState.playerHand, gameState.dealerHand);
   busted(gameState.dealerHand);
-  showHand(gameState.playerHand);
   showHand(gameState.dealerHand);
+  showHand(gameState.playerHand);
   determineWinner(gameState.dealerHand, gameState.playerHand);
   continueGame();
   checkForReshuffle();

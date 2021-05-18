@@ -31,19 +31,19 @@ let gameState = {
     total: 0,
     values: [],
     cards: [],
-    BUSTED: false,
-    SCORE: 0,
-    IDENT: "PLAYER"
+    busted: false,
+    score: 0,
+    ident: "PLAYER"
   },
   dealerHand: {
     total: 0,
     values: [],
     cards: [],
-    BUSTED: false,
-    SCORE: 0,
-    IDENT: "DEALER"
+    busted: false,
+    score: 0,
+    ident: "DEALER"
   },
-  DECK_POSITIONS: [
+  deckPositions: [
     'C.2', 'C.3', 'C.4', 'C.5', 'C.6', 'C.7', 'C.8', 'C.9', 'C.10', 'C.J', 'C.Q', 'C.K', 'C.A',
     'D.2', 'D.3', 'D.4', 'D.5', 'D.6', 'D.7', 'D.8', 'D.9', 'D.10', 'D.J', 'D.Q', 'D.K', 'D.A',
     'H.2', 'H.3', 'H.4', 'H.5', 'H.6', 'H.7', 'H.8', 'H.9', 'H.10', 'H.J', 'H.Q', 'H.K', 'H.A',
@@ -52,20 +52,20 @@ let gameState = {
 };
 
 function shuffleCards() {
-  gameState.DECK_POSITIONS = JSON.parse(JSON.stringify(MASTER_DECK_POSITIONS));
+  gameState.deckPositions = JSON.parse(JSON.stringify(MASTER_DECK_POSITIONS));
 
   let temp = [];
-  while (gameState.DECK_POSITIONS.length > 0) {
-    let idx = Math.floor(Math.random() * gameState.DECK_POSITIONS.length);
-    temp.push(gameState.DECK_POSITIONS[idx]);
-    gameState.DECK_POSITIONS.splice(idx, 1);
+  while (gameState.deckPositions.length > 0) {
+    let idx = Math.floor(Math.random() * gameState.deckPositions.length);
+    temp.push(gameState.deckPositions[idx]);
+    gameState.deckPositions.splice(idx, 1);
   }
 
-  temp.forEach( element => gameState.DECK_POSITIONS.push(element));
+  temp.forEach( element => gameState.deckPositions.push(element));
 }
 
 function checkForReshuffle() {
-  if (gameState.DECK_POSITIONS.length <= RESHUFFLE_LIMIT) {
+  if (gameState.deckPositions.length <= RESHUFFLE_LIMIT) {
     shuffleCards();
   }
 }
@@ -80,13 +80,13 @@ function resetHands() {
   gameState.playerHand.cards.length = 0;
   gameState.dealerHand.cards.length = 0;
 
-  gameState.playerHand.BUSTED = false;
-  gameState.dealerHand.BUSTED = false;
+  gameState.playerHand.busted = false;
+  gameState.dealerHand.busted = false;
 }
 
 function resetScores() {
-  gameState.playerHand.SCORE = 0;
-  gameState.dealerHand.SCORE = 0;
+  gameState.playerHand.score = 0;
+  gameState.dealerHand.score = 0;
 }
 
 function updateHandCards(player, card) {
@@ -145,7 +145,7 @@ function dealCards() {
 }
 
 function drawCard(player) {
-  let card = gameState.DECK_POSITIONS.pop().split('.');
+  let card = gameState.deckPositions.pop().split('.');
   updateHandCards(player, card);
   updateHandValue(player, card);
 }
@@ -170,7 +170,7 @@ function getAndValidateUserResponse() {
 
 function busted(player) {
   if (player.total > OPTIMAL_SCORE) {
-    player.BUSTED = true;
+    player.busted = true;
     return true;
   }
 
@@ -178,7 +178,7 @@ function busted(player) {
 }
 
 function hitStay(player) {
-  if (player.IDENT === "PLAYER") {
+  if (player.ident === "PLAYER") {
     if (getAndValidateUserResponse() === 'H') {
       console.clear();
       drawCard(player);
@@ -198,7 +198,7 @@ function hitStay(player) {
 }
 
 function displayScore(player, dealer) {
-  console.log(`DEALER SCORE: ${dealer.SCORE} <<>> PLAYER SCORE: ${player.SCORE}\n`);
+  console.log(`DEALER SCORE: ${dealer.score} <<>> PLAYER score: ${player.score}\n`);
 }
 
 function showDealerHandUpcardOnly() {
@@ -207,9 +207,9 @@ function showDealerHandUpcardOnly() {
 
 function showHand(player) {
   console.log(MESSAGE.TALLY_BAR);
-  if (player.IDENT === "PLAYER") {
+  if (player.ident === "PLAYER") {
     console.log(MESSAGE.PLAYER_HAND_PROMPT + player.total);
-  } else if (player.IDENT === "DEALER") {
+  } else if (player.ident === "DEALER") {
     console.log(MESSAGE.DEALER_HAND_PROMPT + player.total);
   }
   console.log(MESSAGE.TALLY_BAR);
@@ -226,39 +226,39 @@ function declareTie() {
 }
 
 function declareForPlayer(player, dealer) {
-  resetHands();
-  player.SCORE++;
-  if (dealer.BUSTED) console.log(MESSAGE.DEALER_BUSTS);
+  player.score++;
+  if (dealer.busted) console.log(MESSAGE.DEALER_BUSTS);
   console.log(MESSAGE.PLAYER_WINS);
+  resetHands();
 }
 
 function declareForDealer(player, dealer) {
-  resetHands();
-  dealer.SCORE++;
-  if (player.BUSTED) console.log(MESSAGE.PLAYER_BUSTS);
+  dealer.score++;
+  if (player.busted) console.log(MESSAGE.PLAYER_BUSTS);
   console.log(MESSAGE.DEALER_WINS);
+  resetHands();
 }
 
 function determineWinner(dealer, player) {
-  if (player.BUSTED) {
+  if (player.busted) {
     declareForDealer(player, dealer);
-  } else if (player.values < dealer.values && !dealer.BUSTED) {
+  } else if (player.total < dealer.total && !dealer.busted) {
     declareForDealer(player, dealer);
-  } else if (player.values < dealer.values && dealer.BUSTED) {
+  } else if (player.total < dealer.total && dealer.busted) {
     declareForPlayer(player, dealer);
-  } else if (dealer.values < player.values) {
+  } else if (dealer.total < player.total) {
     declareForPlayer(player, dealer);
-  } else if (dealer.values === player.values) {
+  } else if (dealer.total === player.total) {
     declareTie();
   }
 }
 
 function noMatchWinner(player, dealer) {
-  if (player.SCORE >= WINNING_MATCH_SCORE) {
+  if (player.score >= WINNING_MATCH_SCORE) {
     displayScore(player, dealer);
     console.log(MESSAGE.PLAYER_GRAND_WINNER);
     return false;
-  } else if (dealer.SCORE >= WINNING_MATCH_SCORE) {
+  } else if (dealer.score >= WINNING_MATCH_SCORE) {
     displayScore(player, dealer);
     console.log(MESSAGE.DEALER_GRAND_WINNER);
     return false;

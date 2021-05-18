@@ -102,7 +102,7 @@ function updateHandCards(player, card) {
 }
 
 function determineAceValue(player) {
-  if (player.values + ACE_HIGH_VAL > OPTIMAL_SCORE) {
+  if (player.total + ACE_HIGH_VAL > OPTIMAL_SCORE) {
     player.values.push(ACE_LOW_VAL);
   } else {
     player.values.push(ACE_HIGH_VAL);
